@@ -19,18 +19,18 @@ export async function POST(req: Request) {
     const { customerName } = await req.json()
 
     const { data, error } = await supabase.from("customers").insert({ name: customerName }).select()
+    // possibly store sponsor's plan id if desired
 
-    if (error)
+    if (error) {
+      console.log(error)
       return NextResponse.json("error")
+    }
 
-    console.log(data)
-    const customerId = data[0]
+    const customerId = data[0].id
 
     const authorizeUrl = (FINCH_SANDBOX === 'true')
       ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}&sandbox=${FINCH_SANDBOX}`).toString()
       : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}`).toString()
-
-    // TODO: save customerName, customerId, and planId together in db (customerId could be planId if desired??)
 
     return new NextResponse(
       JSON.stringify(authorizeUrl.toString())

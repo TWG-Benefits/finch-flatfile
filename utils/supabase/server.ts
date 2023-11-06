@@ -8,7 +8,7 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       db: {
-        schema: 'private'
+        schema: 'public'
       },
       cookies: {
         get(name: string) {

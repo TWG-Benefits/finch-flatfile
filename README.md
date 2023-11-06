@@ -91,3 +91,58 @@ Please file feedback and issues over on the [Supabase GitHub org](https://github
 - [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
 - [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
 - [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+
+---
+
+create tables in supabase
+
+```
+create schema finch;
+
+-- Create the Customers table
+ create table customers (
+    id uuid NOT NULL DEFAULT gen_random_uuid (),
+    name text null,
+    created_at timestamp with time zone not null default now(),
+    CONSTRAINT Customers_pkey PRIMARY KEY (id)
+  );
+  alter table customers enable row level security;
+
+
+ -- Insert some sample data
+ insert into customers (name)
+ values
+   ('Walmart'),
+   ('Chick-Fil-A'),
+   ('Mattress Firm');
+
+-- Create the Connections table
+ create table connections (
+    id uuid not null default gen_random_uuid (),
+    customer_id uuid not null references customers,
+    company_id uuid not null,
+    provider_id text not null,
+    account_id uuid null,
+    finch_access_token uuid not null,
+    created_at timestamp with time zone not null default now(),
+    CONSTRAINT connections_company_id_key unique (company_id, finch_access_token),
+    CONSTRAINT Connections_pkey PRIMARY KEY (id),
+    CONSTRAINT "customerId_fkey" FOREIGN KEY ("customer_id")
+        REFERENCES  customers (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+  );
+  alter table connections enable row level security;
+
+  CREATE policy "Authenticated users can read and write to customers"
+  ON customers 
+  FOR ALL
+  TO authenticated
+  USING ( true );
+
+  CREATE policy "Authenticated users can read and write to connections"
+  ON connections 
+  FOR ALL
+  TO authenticated
+  USING ( true );
+```
