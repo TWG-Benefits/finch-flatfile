@@ -1,0 +1,42 @@
+// pages/api/generate-url.ts
+import { NextResponse } from 'next/server';
+import Finch from '@tryfinch/finch-api';
+//import { v4 as uuidv4 } from 'uuid';
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
+
+const FINCH_CLIENT_ID = process.env.FINCH_CLIENT_ID;
+const FINCH_REDIRECT_URI = process.env.FINCH_REDIRECT_URI ?? 'http://localhost:3000/api/callback';
+const FINCH_PRODUCTS = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement'
+const FINCH_SANDBOX = process.env.FINCH_SANDBOX
+
+export async function POST(req: Request) {
+  console.log(req.method + " /api/finch/connect");
+  const cookieStore = cookies()
+  const supabase = createClient(cookieStore);
+
+  try {
+    const { customerName } = await req.json()
+
+    const { data, error } = await supabase.from("customers").insert({ name: customerName }).select()
+
+    if (error)
+      return NextResponse.json("error")
+
+    console.log(data)
+    const customerId = data[0]
+
+    const authorizeUrl = (FINCH_SANDBOX === 'true')
+      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}&sandbox=${FINCH_SANDBOX}`).toString()
+      : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}`).toString()
+
+    // TODO: save customerName, customerId, and planId together in db (customerId could be planId if desired??)
+
+    return new NextResponse(
+      JSON.stringify(authorizeUrl.toString())
+    )
+  } catch (error) {
+    console.error(error);
+  }
+
+}
