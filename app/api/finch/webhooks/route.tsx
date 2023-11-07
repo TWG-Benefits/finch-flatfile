@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
-import handleNewDataSync from './handle-new-data-sync';
+import ds from './handle-data-sync';
 
 const finch = new Finch() // no access token since not needed for webhook secret verification
 
@@ -28,11 +28,17 @@ export async function POST(req: Request) {
     6. save webhook secret in app .env variable
     */
 
-    if (payload.event_type == 'test')
-        new NextResponse(JSON.stringify({ ok: true }))
+    if (payload.event_type == 'test') {
+        console.log("handle test data sync")
+        await ds.handleTestDataSync().then(() => {
+            return new NextResponse(
+                JSON.stringify({ ok: true })
+            )
+        })
+    }
 
     if (payload.event_type == 'job.data_sync_all.complete') {
-        await handleNewDataSync(payload.company_id).then(() => {
+        await ds.handleNewDataSync(payload.company_id).then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })
             )

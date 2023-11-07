@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
         redirect_uri: process.env.BASE_URL + "/api/finch/callback"
     }))
 
+    // exchange the temporary authorization code for a permanent access token
     const authRes = await fetch(`${process.env.FINCH_API_URL}/auth/token`, {
         method: 'POST',
         headers: {
@@ -60,6 +61,7 @@ export async function GET(req: NextRequest) {
 
     const introspect = await finch.account.introspect()
 
+    // Create a new connection in db associated with the right customer_id
     const { error: connectionError } = await supabase.from("connections").insert({ customer_id: customerId, company_id: introspect.company_id, provider_id: introspect.payroll_provider_id, finch_access_token: token })
 
     if (connectionError) {

@@ -72,7 +72,7 @@ type FinchEmployee = {
     middle_name: string,
     last_name: string
     manager: {
-        id: string
+        id: string | null
     },
     department: {
         name: string
@@ -170,7 +170,7 @@ type FinchPayment = {
         end_date: string
     };
     pay_date: string,
-    debit_date: string;
+    debit_date: string | null;
     company_debit: Money
     gross_pay: Money
     net_pay: Money
@@ -183,7 +183,7 @@ type FinchPayStatement = {
     individual_id: string,
     type: 'regular_payroll' | 'off_cycle_payroll' | 'one_time_payment' | null,
     payment_method: 'check' | 'direct_deposit' | null,
-    total_hours: number,
+    total_hours: number | null,
     gross_pay: Money,
     net_pay: Money,
     earnings: {
@@ -214,7 +214,7 @@ type FinchPayStatement = {
         | 'hsa_pre' | 'hsa_post' | 'fsa_medical'
         | 'fsa_dependent_care' | 'simple_ira' | 'simple'
         | 'commuter' | 'custom_post_tax' | 'custom_pre_tax'
-    }[],
+    }[] | null,
     employer_contributions: {
         name: string,
         amount: number,
@@ -225,7 +225,7 @@ type FinchPayStatement = {
         | 'hsa_pre' | 'hsa_post' | 'fsa_medical'
         | 'fsa_dependent_care' | 'simple_ira' | 'simple'
         | 'commuter' | 'custom_post_tax' | 'custom_pre_tax'
-    }[]
+    }[] | null
 }
 
 type FinchWebhookPayload = {
