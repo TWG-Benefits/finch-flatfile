@@ -3,6 +3,10 @@ import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import moment from 'moment'
 import { Payment, Payments } from '@tryfinch/finch-api/resources/hris/payments';
+import { createSFTPClient } from '@/utils/sftp';
+
+const sftpClient = createSFTPClient()
+
 
 // yyyy-mm-dd, including leap years
 const dateRegex = /^(?:(?:1[6-9]|[2-9]\d)?\d{2})(?:(?:(\/|-|\.)(?:0?[13578]|1[02])\1(?:31))|(?:(\/|-|\.)(?:0?[13-9]|1[0-2])\2(?:29|30)))$|^(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\/|-|\.)0?2\3(?:29)$|^(?:(?:1[6-9]|[2-9]\d)?\d{2})(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:0?[1-9]|1\d|2[0-8])$/
@@ -47,7 +51,7 @@ async function handleNewDataSync(companyId: string) {
 
     const providerId = data[0].provider_id
     const token = data[0].finch_access_token
-    const lastProcessedPaymentId = data[0].last_processed_payment
+    let lastProcessedPaymentId = data[0].last_processed_payment
 
     // Init Finch SDK
     const finch = new Finch({
@@ -63,6 +67,11 @@ async function handleNewDataSync(companyId: string) {
 
     // get all the new payments from Finch
     const recentPayments = (await finch.hris.payments.list({ start_date: startDate, end_date: endDate })).items as FinchPayment[]
+
+    // check if this is a new connection, and if true set to payment id 2 pay cycles ago in order to get historical data
+    if (lastProcessedPaymentId == null || lastProcessedPaymentId == '')
+        lastProcessedPaymentId = recentPayments[recentPayments.length - 3].id
+
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
 
     // get the Finch pay statements for all new payments
@@ -83,11 +92,18 @@ async function handleNewDataSync(companyId: string) {
 
     const csv = convertPayrollToFile(individuals, newPayments)
 
-    // put file somewhere
-
+    try {
+        await sftpClient.putCSV(csv, `/${companyId}/finch-${companyId}-${providerId}-payroll.csv`); // could include payDate if broken out by each file
+        console.log('File uploaded via SFTP successfully');
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
 }
 
 async function handleTestDataSync() {
+    const companyId = "00000000-0000-0000-0000-000000000002"
+    const providerId = "gusto"
+    const payDate = "2023-9-31"
     // Possible Payment Ids in recentPayments
     //
     // 5c7ca37d-c3ff-4fe5-ab9b-ff51a8362803
@@ -1629,9 +1645,13 @@ async function handleTestDataSync() {
 
     const csv = convertPayrollToFile(individuals, newPayments)
 
-    console.log(csv)
+    try {
+        await sftpClient.putCSV(csv, `/${companyId}/finch-${companyId}-${providerId}-payroll-${payDate}.csv`);
+        console.log('File uploaded via SFTP successfully');
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
 
-    // put file somewhere
 }
 
 export default { handleNewDataSync, handleTestDataSync }
@@ -1663,7 +1683,8 @@ function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: str
     return results;
 }
 
-function convertPayrollToFile(DirectoryJson: FinchEmployee[], PayDataJson: PayData) {
+// TODO: This ultimately needs to convert each paymentId into separate files, the return string[] of csv files
+function convertPayrollToFile(DirectoryJson: FinchEmployee[], PayDataJson: PayData): string {
     const headers = [
         "Individual ID",
         "Name",

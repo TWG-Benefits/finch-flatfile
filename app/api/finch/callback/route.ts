@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
     const { error: connectionError } = await supabase.from("connections").insert({ customer_id: customerId, company_id: introspect.company_id, provider_id: introspect.payroll_provider_id, finch_access_token: token })
 
     if (connectionError) {
+        console.log(connectionError)
         return new NextResponse(
             redirect('/connection/failure')
         )

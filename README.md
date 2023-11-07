@@ -125,7 +125,7 @@ create schema finch;
     account_id uuid null,
     finch_access_token uuid not null,
     created_at timestamp with time zone not null default now(),
-    CONSTRAINT connections_company_id_key unique (company_id, finch_access_token),
+    CONSTRAINT connections_company_id_key unique (finch_access_token),
     CONSTRAINT Connections_pkey PRIMARY KEY (id),
     CONSTRAINT "customerId_fkey" FOREIGN KEY ("customer_id")
         REFERENCES  customers (id) MATCH SIMPLE
