@@ -2,11 +2,9 @@ import Finch from '@tryfinch/finch-api';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import moment from 'moment'
-import { Payment, Payments } from '@tryfinch/finch-api/resources/hris/payments';
 import { createSFTPClient } from '@/utils/sftp';
 
 const sftpClient = createSFTPClient()
-
 
 // yyyy-mm-dd, including leap years
 const dateRegex = /^(?:(?:1[6-9]|[2-9]\d)?\d{2})(?:(?:(\/|-|\.)(?:0?[13578]|1[02])\1(?:31))|(?:(\/|-|\.)(?:0?[13-9]|1[0-2])\2(?:29|30)))$|^(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\/|-|\.)0?2\3(?:29)$|^(?:(?:1[6-9]|[2-9]\d)?\d{2})(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:0?[1-9]|1\d|2[0-8])$/
@@ -31,27 +29,31 @@ type FinchPayStatementRes = {
         },
         pay_statements: FinchPayStatement[]
     }
-}[]
+}
 type PayData = {
     payment_id: string,
     pay_date: string | null,
     pay_statements: FinchPayStatement[]
-}[]
+}
 
 async function handleNewDataSync(companyId: string) {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore);
 
     const { data, error } = await supabase.from("connections").select().eq('company_id', companyId)
+    console.log("CONNECTION")
+    console.log(data)
 
     if (error) {
         console.log(error)
         throw new Error(error?.message)
     }
 
+    const connectionId = data[0].id
+    const customerId = data[0].customer_id
     const providerId = data[0].provider_id
     const token = data[0].finch_access_token
-    let lastProcessedPaymentId = data[0].last_processed_payment
+    const lastProcessedPaymentId = data[0].last_processed_payment
 
     // Init Finch SDK
     const finch = new Finch({
@@ -60,17 +62,18 @@ async function handleNewDataSync(companyId: string) {
 
     const now = moment()
     const endDate = now.format("YYYY-MM-DD")
-    const startDate = moment().subtract(6, 'months').format("YYYY-MM-DD")
+    const startDate = moment().subtract(3, 'months').format("YYYY-MM-DD")
 
     if (!startDate.match(dateRegex) || !endDate.match(dateRegex))
         console.log("error: improper start_date or end_date format")
 
-    // get all the new payments from Finch
+    // get all the payments in the last 3 months from Finch
     const recentPayments = (await finch.hris.payments.list({ start_date: startDate, end_date: endDate })).items as FinchPayment[]
 
     // check if this is a new connection, and if true set to payment id 2 pay cycles ago in order to get historical data
-    if (lastProcessedPaymentId == null || lastProcessedPaymentId == '')
-        lastProcessedPaymentId = recentPayments[recentPayments.length - 3].id
+    if (lastProcessedPaymentId == null || lastProcessedPaymentId == '') {
+        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 3].id }).eq('connection_id', connectionId)
+    }
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
 
@@ -79,7 +82,7 @@ async function handleNewDataSync(companyId: string) {
         requests: newPayments.map(payment => {
             return { payment_id: payment.payment_id }
         })
-    })).responses as FinchPayStatementRes
+    })).responses as FinchPayStatementRes[]
 
     // For each pay-statement, match the individual pay-statements with the payment details
     payStatements.forEach(response => {
@@ -88,12 +91,13 @@ async function handleNewDataSync(companyId: string) {
             payment.pay_statements = response.body.pay_statements // there is a payment_id match, update the pay_statements with the pay_date
     })
 
+    // get the company directory from Finch
     const individuals = (await finch.hris.directory.list()).individuals as FinchEmployee[]
 
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${companyId}/finch-${companyId}-${providerId}-payroll.csv`); // could include payDate if broken out by each file
+        await sftpClient.putCSV(csv, `/${customerId}/finch-${companyId}-${providerId}-payroll.csv`); // could include payDate if broken out by each file
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
@@ -101,6 +105,7 @@ async function handleNewDataSync(companyId: string) {
 }
 
 async function handleTestDataSync() {
+    const customerId = "00000000-0000-0000-0000-000000000001"
     const companyId = "00000000-0000-0000-0000-000000000002"
     const providerId = "gusto"
     const payDate = "2023-9-31"
@@ -285,7 +290,7 @@ async function handleTestDataSync() {
     ]
     const lastProcessedPaymentId = "2a7f754a-9cfd-4c4f-97a3-4094048398a1"
     // pay statement for db5c608c-14fa-4bdd-a45b-48552540e9d4
-    const payStatements: FinchPayStatementRes = [{
+    const payStatements: FinchPayStatementRes[] = [{
         "payment_id": "db5c608c-14fa-4bdd-a45b-48552540e9d4",
         "code": 200,
         "body": {
@@ -1358,7 +1363,7 @@ async function handleTestDataSync() {
 
     // should return [ "db5c608c-14fa-4bdd-a45b-48552540e9d4" ]
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
-    console.log(newPayments)
+    //console.log(newPayments)
 
     // For each pay-statement, match the individual pay-statements with the payment details
     payStatements.forEach(response => {
@@ -1656,7 +1661,7 @@ async function handleTestDataSync() {
 
 export default { handleNewDataSync, handleTestDataSync }
 
-function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: string): PayData {
+function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: string): PayData[] {
     let foundLastProcessed = false;
 
     // Assuming that if lastProcessedPaymentId is not found, all payments are new
@@ -1664,7 +1669,7 @@ function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: str
         foundLastProcessed = true;
     }
 
-    const results: PayData = [];
+    const results: PayData[] = [];
 
     for (const payment of payments) {
         if (foundLastProcessed) {
@@ -1684,7 +1689,8 @@ function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: str
 }
 
 // TODO: This ultimately needs to convert each paymentId into separate files, the return string[] of csv files
-function convertPayrollToFile(DirectoryJson: FinchEmployee[], PayDataJson: PayData): string {
+// right now, it just takes all the pay data and puts it into a single file, but still broken down by pay date
+function convertPayrollToFile(DirectoryJson: FinchEmployee[], PayDataJson: PayData[]): string {
     const headers = [
         "Individual ID",
         "Name",

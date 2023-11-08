@@ -29,7 +29,6 @@ export async function POST(req: Request) {
     */
 
     if (payload.event_type == 'test') {
-        console.log("handle test data sync")
         await ds.handleTestDataSync().then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })
