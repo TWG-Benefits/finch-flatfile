@@ -1,15 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 
-export default async function Connections() {
+export default async function Customers() {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore)
-    const { data: connections } = await supabase.from('connections').select(`
-    customer_id,
-    company_id,
-    provider_id,
-    account_id,
-    created_at
+    const { data: connections } = await supabase.from('customers').select(`
+    customer_name,
+    plan_id,
+    finch_connect_url
     `)
 
     console.log(connections)
