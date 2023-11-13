@@ -4,13 +4,13 @@ import { cookies } from 'next/headers'
 export default async function Customers() {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore)
-    const { data: connections } = await supabase.from('customers').select(`
+    const { data: customers } = await supabase.from('customers').select(`
     customer_name,
     plan_id,
     finch_connect_url
     `)
 
-    console.log(connections)
+    console.log(customers)
 
-    return <pre>{JSON.stringify(connections, null, 2)}</pre>
+    return <pre>{JSON.stringify(customers, null, 2)}</pre>
 }
