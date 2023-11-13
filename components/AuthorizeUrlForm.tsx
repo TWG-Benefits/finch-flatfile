@@ -9,7 +9,8 @@ export default function AuthorizeUrlForm() {
     const initialFormValues = {
         customerName: '',
         planId: '',
-        agreed: false,
+        providerId: '', // not used yet
+        confirm: false,
     }
     const [formValues, setFormValues] = useState(initialFormValues)
     const [authorizeUrl, setAuthorizeUrl] = useState<string | null>(null);
@@ -40,6 +41,7 @@ export default function AuthorizeUrlForm() {
                 },
                 body: JSON.stringify({
                     customerName: formValues.customerName,
+                    planId: formValues.planId
                 })
             });
 
@@ -92,10 +94,10 @@ export default function AuthorizeUrlForm() {
                     <Switch.Group as="div" className="flex gap-x-4 sm:col-span-2">
                         <div className="flex h-6 items-center">
                             <Switch
-                                checked={formValues.agreed}
-                                onChange={(e) => setFormValues({ ...formValues, agreed: e.valueOf() })}
+                                checked={formValues.confirm}
+                                onChange={(e) => setFormValues({ ...formValues, confirm: e.valueOf() })}
                                 className={classNames(
-                                    formValues.agreed ? 'bg-indigo-600' : 'bg-gray-200',
+                                    formValues.confirm ? 'bg-indigo-600' : 'bg-gray-200',
                                     'flex w-8 flex-none cursor-pointer rounded-full p-px ring-1 ring-inset ring-gray-900/5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                                 )}
                             >
@@ -103,7 +105,7 @@ export default function AuthorizeUrlForm() {
                                 <span
                                     aria-hidden="true"
                                     className={classNames(
-                                        formValues.agreed ? 'translate-x-3.5' : 'translate-x-0',
+                                        formValues.confirm ? 'translate-x-3.5' : 'translate-x-0',
                                         'h-4 w-4 transform rounded-full bg-white shadow-sm ring-1 ring-gray-900/5 transition duration-200 ease-in-out'
                                     )}
                                 />
@@ -180,7 +182,7 @@ export default function AuthorizeUrlForm() {
                                     <ul role="list" className="list-disc space-y-1 pl-5">
                                         {!formValues.customerName && (<li>Customer name is required</li>)}
                                         {!formValues.planId && (<li>Plan Id is required</li>)}
-                                        {!formValues.agreed && (<li>You must agree to the privacy policy</li>)}
+                                        {!formValues.confirm && (<li>You must agree to the privacy policy</li>)}
 
                                     </ul>
                                 </div>

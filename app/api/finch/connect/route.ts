@@ -16,9 +16,9 @@ export async function POST(req: Request) {
   const supabase = createClient(cookieStore);
 
   try {
-    const { customerName } = await req.json()
+    const { customerName, planId } = await req.json()
 
-    const { data, error } = await supabase.from("customers").insert({ name: customerName }).select()
+    const { data, error } = await supabase.from("customers").insert({ customer_name: customerName, plan_id: planId }).select()
     // possibly store sponsor's plan id if desired
 
     if (error) {
@@ -31,6 +31,15 @@ export async function POST(req: Request) {
     const authorizeUrl = (FINCH_SANDBOX === 'true')
       ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}&sandbox=${FINCH_SANDBOX}`).toString()
       : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}`).toString()
+
+
+    // save finch connect url for future reference (like reauthentication events)
+    const { error: updateError } = await supabase.from("customers").update({ finch_connect_url: authorizeUrl }).eq('id', customerId)
+
+    if (updateError) {
+      console.log(updateError)
+      return NextResponse.json("error")
+    }
 
     return new NextResponse(
       JSON.stringify(authorizeUrl.toString())

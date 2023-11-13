@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { baseUrl } from '@/utils/constants';
 
 type FinchTokenRes = {
     access_token: string
@@ -26,18 +27,12 @@ export async function GET(req: NextRequest) {
 
     const { data: customer, error: customerError } = await supabase.from("customers").select().eq('id', customerId)
 
-    // only allow callback request if customerId matches a customerId stored in db
+    // for security reasons, only allow callback request if customerId matches a customerId stored in db
     if (!customer || customerError) {
+        console.log("customerId does not match a customerId stored in database")
         console.log(customerError)
-        return NextResponse.redirect('/connection/failure')
+        return NextResponse.redirect(baseUrl + '/connection/failure')
     }
-
-    console.log(JSON.stringify({
-        client_id: process.env.FINCH_CLIENT_ID,
-        client_secret: process.env.FINCH_CLIENT_SECRET,
-        code: code,
-        redirect_uri: process.env.BASE_URL + "/api/finch/callback"
-    }))
 
     // exchange the temporary authorization code for a permanent access token
     const authRes = await fetch(`${process.env.FINCH_API_URL}/auth/token`, {
@@ -67,11 +62,11 @@ export async function GET(req: NextRequest) {
     if (connectionError) {
         console.log(connectionError)
         return new NextResponse(
-            redirect('/connection/failure')
+            redirect(baseUrl + '/connection/failure')
         )
     } else {
         return new NextResponse(
-            redirect('/connection/success')
+            redirect(baseUrl + '/connection/success')
         )
     }
 
