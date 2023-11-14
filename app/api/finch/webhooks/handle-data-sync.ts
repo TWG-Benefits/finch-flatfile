@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import moment from 'moment'
 import { createSFTPClient } from '@/utils/sftp';
 import { Connection, Customer } from '@/types/database';
+import { UUID } from 'crypto';
 
 
 const sftpClient = createSFTPClient()
@@ -64,7 +65,7 @@ async function handleNewDataSync(companyId: string) {
     }
 
     const token = connection.finch_access_token
-    const lastProcessedPaymentId = connection.last_processed_payment
+    let lastProcessedPaymentId = connection.last_processed_payment
 
     // Init Finch SDK
     const finch = new Finch({
@@ -81,9 +82,12 @@ async function handleNewDataSync(companyId: string) {
     // get all the payments in the last 3 months from Finch
     const recentPayments = (await finch.hris.payments.list({ start_date: startDate, end_date: endDate })).items as FinchPayment[]
 
-    // check if this is a new connection, and if true set to payment id 2 pay cycles ago in order to get historical data
+    // if this is a new connection, lastProcessedPaymentId will be null
     if (lastProcessedPaymentId == null) {
-        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 3].id }).eq('connection_id', connection.id)
+        // set the lastProcessedPaymentId to 2 pay cycles ago in order to get some historical data
+        lastProcessedPaymentId = recentPayments[recentPayments.length - 3].id as UUID
+        // but write the newest (i.e. the last) paymentId to the database
+        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 1].id }).eq('connection_id', connection.id)
     }
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
