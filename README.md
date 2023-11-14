@@ -1,10 +1,20 @@
-# Finch CSV
+# Finch File
 
-Description
+Finch File is a low-lift tool provided by [Finch](https://tryfinch.com), which simplifies quick access to Finch’s modern, universal-API based platform. It unlocks the 200+ Payroll and HRIS providers without having to rebuild existing file-based tooling from scratch.
 
 ## Demo
 
-You can view a fully working demo at []().
+You can view a fully working demo at [https://finch-csv-demo.vercel.app](https://finch-csv-demo.vercel.app/).
+
+## How Finch File Works
+
+You host Finch File on your own infrastructure, allowing you to easily configure automatic File generation of Organization, Pay, and Benefits data. This allows for a quick replacement of existing file-based workflows, and rapid deployment into existing integrations across record keeping systems, custom automations, and existing business processes.
+
+Finch File is composed of a web frontend and a simple backend that can track customers and generate unique URLs for them to authenticate with Finch Connect. It then leverages Finch Webhooks to listen for new payroll updates across all connected customers and automatically generates a CSV with the data you want. This facilitates daily monitoring of new payroll data, organization data, and more.
+
+Currently, file format setup and deployment is completed manually by Finch. Finch will help set the fields needed in consultation with you as part of the process in getting set up. As an added bonus, we’re working on a version update that will allow connections to be migrated to a more robust application by importing the Finch access_tokens for those connections. This future update will mitigate additional work from your customers, removing the requirement to re-authenticate.
+
+## 
 
 ## Deploy to Vercel
 
@@ -63,9 +73,11 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
     6. save webhook secret in app .env variable
     */
 
-## Feedback and issues
+## Learn more, provide feedback, and raise issues
 
-Please file feedback and issues over on the ...
+For more information, please contact your Developer Success Engineer or your Account Executive to learn about how Finch File can simplify your Finch deployment.
+
+---
 
 ## create tables in supabase
 
@@ -109,12 +121,12 @@ Please file feedback and issues over on the ...
   CREATE policy "Authenticated users can read and write to customers"
   ON customers 
   FOR ALL
-  TO authenticated
+  TO anon, authenticated
   USING ( true );
 
-  CREATE policy "Authenticated users can read and write to connections"
+  CREATE policy "Application using anon key can read and write to connections"
   ON connections 
   FOR ALL
-  TO authenticated
+  TO anon, authenticated
   USING ( true );
 ```

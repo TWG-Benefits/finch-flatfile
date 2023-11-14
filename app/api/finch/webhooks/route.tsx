@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         })
     }
 
-    if (payload.event_type == 'job.data_sync_all.complete') {
+    if (payload.event_type == 'job.data_sync_all.completed') {
         await ds.handleNewDataSync(payload.company_id).then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })

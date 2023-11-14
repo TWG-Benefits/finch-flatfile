@@ -231,6 +231,6 @@ type FinchPayStatement = {
 type FinchWebhookPayload = {
     company_id: string,
     account_id: string,
-    event_type: 'account.updated' | 'job.data_sync_all.complete' | 'job.benefit_create.complete' | 'job.benefit_enroll.complete' | 'test',
+    event_type: 'account.updated' | 'job.data_sync_all.completed' | 'job.benefit_create.completed' | 'job.benefit_enroll.completed' | 'test',
     data: Object
 }
