@@ -1,18 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    webpack: (config, { dev, isServer, webpack, nextRuntime }) => {
-        config.module.rules.push({
-            test: /\.node$/,
-            use: [
-                {
-                    loader: "nextjs-node-loader",
-                    options: {
-                        flags: os.constants.dlopen.RTLD_NOW,
-                        outputPath: config.output.path
-                    }
-                },
-            ],
-        });
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            config.externals = config.externals.map(external => {
+                if (typeof external !== 'function') return external;
+                return (ctx, req, cb) => (req.endsWith('.node') ? cb() : external(ctx, req, cb));
+            });
+        }
         return config;
     },
 }
