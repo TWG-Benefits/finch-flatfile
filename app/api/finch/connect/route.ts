@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 
 const FINCH_CLIENT_ID = process.env.FINCH_CLIENT_ID;
-const FINCH_REDIRECT_URI = process.env.FINCH_REDIRECT_URI ?? 'http://localhost:3000/api/callback';
+const FINCH_REDIRECT_URI = process.env.FINCH_REDIRECT_URI ?? 'http://localhost:3000/api/finch/callback';
 const FINCH_PRODUCTS = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement'
 const FINCH_SANDBOX = process.env.FINCH_SANDBOX
 

@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     webpack: (config, { isServer }) => {
-        if (!isServer) {
-            config.externals = config.externals.map(external => {
-                if (typeof external !== 'function') return external;
-                return (ctx, req, cb) => (req.endsWith('.node') ? cb() : external(ctx, req, cb));
-            });
-        }
+        // Add the node-loader configuration
+        config.module.rules.push({
+            test: /\.node$/,
+            use: 'node-loader',
+        });
+
+        // Important: return the modified config
         return config;
     },
-}
+    // ... other Next.js config options
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
+
