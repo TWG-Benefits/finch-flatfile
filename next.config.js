@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     webpack: (config, { isServer }) => {
-        // Add the node-loader configuration
+        // necessary for ssh2-sftp-client
         config.module.rules.push({
             test: /\.node$/,
             use: 'node-loader',
@@ -10,7 +10,6 @@ const nextConfig = {
         // Important: return the modified config
         return config;
     },
-    // ... other Next.js config options
 };
 
 module.exports = nextConfig;

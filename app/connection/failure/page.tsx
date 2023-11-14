@@ -1,5 +1,6 @@
 "use client";
 
+import { appName, supportEmail } from '@/utils/constants';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 export default function Failure() {
@@ -17,19 +18,20 @@ export default function Failure() {
                                 Connection failed
                             </h3>
                             <div className="mt-2">
-                                <p className="text-sm text-gray-500">
+                                {/* <p className="text-sm text-gray-500">
                                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur amet labore.
-                                </p>
+                                </p> */}
                             </div>
                         </div>
                     </div>
                     <div className="mt-5 sm:mt-6">
-                        <button
+                        <a
+                            href={`mailto:${supportEmail}?subject=Finch Connection Failed (${appName}) `}
                             type="button"
                             className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             Email Support
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

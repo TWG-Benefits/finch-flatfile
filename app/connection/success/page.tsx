@@ -17,9 +17,9 @@ export default function Success() {
                                 Connection successful
                             </h3>
                             <div className="mt-2">
-                                <p className="text-sm text-gray-500">
+                                {/* <p className="text-sm text-gray-500">
                                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur amet labore.
-                                </p>
+                                </p> */}
                                 <p className="pt-4 text-sm text-gray-500">
                                     You can close this window.
                                 </p>

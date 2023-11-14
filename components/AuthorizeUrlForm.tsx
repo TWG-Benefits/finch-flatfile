@@ -112,7 +112,7 @@ export default function AuthorizeUrlForm() {
                             </Switch>
                         </div>
                         <Switch.Label className="text-sm leading-6 text-gray-600">
-                            Confirm the 'Customer Name' matches the 'Plan ID'
+                            Confirm the 'Customer Name' matches the 'Plan Id'
                             {/* {' '}
                             <a href="#" className="font-semibold text-indigo-600">
                                 privacy&nbsp;policy
@@ -126,7 +126,7 @@ export default function AuthorizeUrlForm() {
                         type="submit"
                         className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
-                        Create URL
+                        Create Finch Connect URL
                     </button>
                 </div>
             </form>

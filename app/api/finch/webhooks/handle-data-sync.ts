@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import moment from 'moment'
 import { createSFTPClient } from '@/utils/sftp';
+import { Connection, Customer } from '@/types/database';
+
 
 const sftpClient = createSFTPClient()
 
@@ -42,20 +44,27 @@ async function handleNewDataSync(companyId: string) {
     //const conn = new Client();
 
 
-    const { data, error } = await supabase.from("connections").select().eq('company_id', companyId)
-    console.log("CONNECTION")
-    console.log(data)
+    const { data: connection, error: connErr } = await supabase.from("connections").select().eq('company_id', companyId).single<Connection>()
+    const { data: customer, error: custErr } = await supabase.from("customers").select().eq('id', connection?.id).single<Customer>()
 
-    if (error) {
-        console.log(error)
-        throw new Error(error?.message)
+    console.log("CUSTOMER")
+    console.log(customer?.customer_name)
+    console.log("CONNECTION")
+    console.log(connection)
+
+
+    if (connErr) {
+        console.log(connErr)
+        throw new Error(connErr?.message)
     }
 
-    const connectionId = data[0].id
-    const customerId = data[0].customer_id
-    const providerId = data[0].provider_id
-    const token = data[0].finch_access_token
-    const lastProcessedPaymentId = data[0].last_processed_payment
+    if (custErr) {
+        console.log(custErr)
+        throw new Error(custErr?.message)
+    }
+
+    const token = connection.finch_access_token
+    const lastProcessedPaymentId = connection.last_processed_payment
 
     // Init Finch SDK
     const finch = new Finch({
@@ -73,8 +82,8 @@ async function handleNewDataSync(companyId: string) {
     const recentPayments = (await finch.hris.payments.list({ start_date: startDate, end_date: endDate })).items as FinchPayment[]
 
     // check if this is a new connection, and if true set to payment id 2 pay cycles ago in order to get historical data
-    if (lastProcessedPaymentId == null || lastProcessedPaymentId == '') {
-        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 3].id }).eq('connection_id', connectionId)
+    if (lastProcessedPaymentId == null) {
+        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 3].id }).eq('connection_id', connection.id)
     }
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
@@ -99,7 +108,7 @@ async function handleNewDataSync(companyId: string) {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${customerId}/finch-${companyId}-${providerId}-payroll.csv`); // could include payDate if broken out by each file
+        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${companyId}-${connection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`); // could include payDate if broken out by each file
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
@@ -107,9 +116,16 @@ async function handleNewDataSync(companyId: string) {
 }
 
 async function handleTestDataSync() {
-    const customerId = "00000000-0000-0000-0000-000000000001"
-    const companyId = "00000000-0000-0000-0000-000000000002"
-    const providerId = "gusto"
+    const connection = {
+        customer_id: "00000000-0000-0000-0000-000000000001",
+        company_id: "00000000-0000-0000-0000-000000000002",
+        provider_id: "gusto"
+    }
+    const customer = {
+        customer_name: "Test Webhook",
+        company_id: "00000000-0000-0000-0000-000000000002",
+        plan_id: "1234567890"
+    }
     const payDate = "2023-9-31"
     // Possible Payment Ids in recentPayments
     //
@@ -1653,7 +1669,7 @@ async function handleTestDataSync() {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${companyId}/finch-${companyId}-${providerId}-payroll-${payDate}.csv`);
+        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${connection.company_id}-${connection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
