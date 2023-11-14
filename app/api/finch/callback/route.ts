@@ -25,6 +25,11 @@ export async function GET(req: NextRequest) {
         customerId
     })
 
+    if (!customerId) {
+        console.log("customerId required")
+        return NextResponse.redirect(baseUrl + '/connection/failure')
+    }
+
     const { data: customer, error: customerError } = await supabase.from("customers").select().eq('id', customerId)
 
     // for security reasons, only allow callback request if customerId matches a customerId stored in db
