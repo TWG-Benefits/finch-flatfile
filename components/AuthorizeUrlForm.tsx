@@ -9,7 +9,7 @@ export default function AuthorizeUrlForm() {
     const initialFormValues = {
         customerName: '',
         planId: '',
-        providerId: '', // not used yet
+        //providerId: '', // not used yet
         confirm: false,
     }
     const [formValues, setFormValues] = useState(initialFormValues)
