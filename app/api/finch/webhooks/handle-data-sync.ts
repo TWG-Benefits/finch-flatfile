@@ -42,30 +42,27 @@ type PayData = {
 async function handleNewDataSync(companyId: string) {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore);
-    //const conn = new Client();
 
-
-    const { data: connection, error: connErr } = await supabase.from("connections").select().eq('company_id', companyId).single<Connection>()
-    const { data: customer, error: custErr } = await supabase.from("customers").select().eq('id', connection?.id).single<Customer>()
-
-    console.log("CUSTOMER")
-    console.log(customer?.customer_name)
-    console.log("CONNECTION")
-    console.log(connection)
-
-
-    if (connErr) {
+    const { data: connection, error: connErr } = await supabase.from("connections").select().eq('company_id', companyId)
+    if (!connection || connErr) {
         console.log(connErr)
         throw new Error(connErr?.message)
     }
 
-    if (custErr) {
+    const newestConnection: Connection = connection[connection.length - 1]
+
+    const { data: customer, error: custErr } = await supabase.from("customers").select().eq('id', newestConnection.customer_id).single()
+    if (!customer || custErr) {
         console.log(custErr)
         throw new Error(custErr?.message)
     }
 
-    const token = connection.finch_access_token
-    let lastProcessedPaymentId = connection.last_processed_payment
+    console.log(`CUSTOMER: ${customer?.customer_name}`)
+    console.log("CONNECTION")
+    console.log(newestConnection)
+
+    const token = newestConnection.finch_access_token
+    let lastProcessedPaymentId = newestConnection.last_processed_payment
 
     // Init Finch SDK
     const finch = new Finch({
@@ -86,8 +83,10 @@ async function handleNewDataSync(companyId: string) {
     if (lastProcessedPaymentId == null) {
         // set the lastProcessedPaymentId to 2 pay cycles ago in order to get some historical data
         lastProcessedPaymentId = recentPayments[recentPayments.length - 3].id as UUID
+        console.log(lastProcessedPaymentId)
         // but write the newest (i.e. the last) paymentId to the database
-        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 1].id }).eq('connection_id', connection.id)
+        const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 1].id }).eq('id', newestConnection.id)
+        console.log(error)
     }
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
@@ -112,7 +111,7 @@ async function handleNewDataSync(companyId: string) {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${companyId}-${connection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`); // could include payDate if broken out by each file
+        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${companyId}-${newestConnection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`); // could include payDate if broken out by each file
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
