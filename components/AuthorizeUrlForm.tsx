@@ -16,6 +16,7 @@ export default function AuthorizeUrlForm() {
     const [authorizeUrl, setAuthorizeUrl] = useState<string | null>(null);
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState(false)
+    const [errorDesc, setErrorDesc] = useState('')
     const [urlCopy, setUrlCopy] = useState(false)
 
     // used for getting ride of error state when all fields are finally filled out
@@ -45,12 +46,19 @@ export default function AuthorizeUrlForm() {
                 })
             });
 
+            const body = await response.json()
 
-            const data = await response.json();
+            if (!response.ok) {
+                setErrorDesc(body)
+                setError(true)
+            } else {
+                setAuthorizeUrl(body)
+                setFormValues(initialFormValues) // reset form
+                setSuccess(true)
+            }
 
-            setAuthorizeUrl(data)
-            setFormValues(initialFormValues) // reset form
-            setSuccess(true)
+
+
 
         }
     };
@@ -65,7 +73,7 @@ export default function AuthorizeUrlForm() {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="mx-auto mt-16 max-w-xl sm:mt-20">
+            <form onSubmit={handleSubmit} className="mx-auto mt-16 w-full sm:mt-20">
                 <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
                     <div className="sm:col-span-2">
                         <label htmlFor="customer" className="block text-sm font-semibold leading-6 text-gray-900">
@@ -112,7 +120,7 @@ export default function AuthorizeUrlForm() {
                             </Switch>
                         </div>
                         <Switch.Label className="text-sm leading-6 text-gray-600">
-                            Confirm the 'Customer Name' matches the 'Plan Id'
+                            Confirm that the Customer Name matches the Plan Id in your system.
                             {/* {' '}
                             <a href="#" className="font-semibold text-indigo-600">
                                 privacy&nbsp;policy
@@ -130,7 +138,7 @@ export default function AuthorizeUrlForm() {
                     </button>
                 </div>
             </form>
-            <div className="mx-auto max-w-xl">
+            <div className="mx-auto w-full">
 
                 {success && (
                     <div className="rounded-md bg-green-50 p-4 mt-8">
@@ -183,9 +191,10 @@ export default function AuthorizeUrlForm() {
                                     <ul role="list" className="list-disc space-y-1 pl-5">
                                         {!formValues.customerName && (<li>Customer name is required</li>)}
                                         {!formValues.planId && (<li>Plan Id is required</li>)}
-                                        {!formValues.confirm && (<li>You must agree to the privacy policy</li>)}
-
+                                        {!formValues.confirm && (<li>You must confirm that name and id match.</li>)}
                                     </ul>
+                                    {errorDesc}
+
                                 </div>
                             </div>
                         </div>

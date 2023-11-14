@@ -11,7 +11,7 @@ export default async function Index() {
 
   return (
     <div className="flex-1 w-full flex flex-col pt-20 items-center">
-      <div className="animate-in flex-1 flex flex-col opacity-0 max-w-4xl px-3">
+      <div className="animate-in flex-1 flex flex-col opacity-0 w-full max-w-2xl px-3">
         {user ?
           <div>
             <Hero />

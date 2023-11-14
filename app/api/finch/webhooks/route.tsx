@@ -19,15 +19,6 @@ export async function POST(req: Request) {
     const payload = finch.webhooks.unwrap(body, req.headers, process.env.FINCH_WEBHOOK_SECRET) as FinchWebhookPayload
     console.log(payload)
 
-    /*
-    1. install ngrok (brew install ngrok/ngrok/ngrok)
-    2. update ngrok authtoken (ngrok config add-authtoken <TOKEN>)
-    3. create static ngrok domain (https://dashboard.ngrok.com/cloud-edge/domains) 
-    4. start ngrok on port 3000
-    5. create webhook in finch using ngrok static domain + /api/finch/webhooks (ex: https://dory-wired-mouse.ngrok-free.app/api/finch/webhooks)
-    6. save webhook secret in app .env variable
-    */
-
     if (payload.event_type == 'test') {
         await ds.handleTestDataSync().then(() => {
             return new NextResponse(
@@ -49,7 +40,4 @@ export async function POST(req: Request) {
     return new NextResponse(
         JSON.stringify({ ok: true })
     )
-
-
-
 }

@@ -1,9 +1,7 @@
-// pages/api/generate-url.ts
 import { NextResponse } from 'next/server';
-import Finch from '@tryfinch/finch-api';
-//import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { supportEmail } from '@/utils/constants';
 
 const FINCH_CLIENT_ID = process.env.FINCH_CLIENT_ID;
 const FINCH_REDIRECT_URI = process.env.FINCH_REDIRECT_URI ?? 'http://localhost:3000/api/finch/callback';
@@ -18,27 +16,24 @@ export async function POST(req: Request) {
   try {
     const { customerName, planId } = await req.json()
 
-    const { data, error } = await supabase.from("customers").insert({ customer_name: customerName, plan_id: planId }).select()
-    // possibly store sponsor's plan id if desired
+    const { data: customer, error } = await supabase.from("customers").insert({ customer_name: customerName, plan_id: planId }).select().single()
 
     if (error) {
       console.log(error)
-      return NextResponse.json("error")
+      return NextResponse.json(`There was a problem creating the customer. Try signing out and signing back in. If the problem persists, contact ${supportEmail}.`, { status: 500 })
     }
 
-    const customerId = data[0].id
-
     const authorizeUrl = (FINCH_SANDBOX === 'true')
-      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}&sandbox=${FINCH_SANDBOX}`).toString()
-      : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customerId}`).toString()
+      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customer.id}&sandbox=${FINCH_SANDBOX}`).toString()
+      : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customer.id}`).toString()
 
 
     // save finch connect url for future reference (like reauthentication events)
-    const { error: updateError } = await supabase.from("customers").update({ finch_connect_url: authorizeUrl }).eq('id', customerId)
+    const { error: updateError } = await supabase.from("customers").update({ finch_connect_url: authorizeUrl }).eq('id', customer.id)
 
     if (updateError) {
       console.log(updateError)
-      return NextResponse.json("error")
+      return NextResponse.json(`Error creating Finch Connect Url. If the problem persists, contact ${supportEmail}.`, { status: 500 })
     }
 
     return new NextResponse(
@@ -46,6 +41,7 @@ export async function POST(req: Request) {
     )
   } catch (error) {
     console.error(error);
+    return NextResponse.json(`Error creating Finch Connect Url. If the problem persists, contact ${supportEmail}.`, { status: 500 })
   }
 
 }

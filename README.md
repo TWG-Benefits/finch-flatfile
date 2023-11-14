@@ -53,6 +53,16 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 
 > Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
 
+6. Get webhooks to work locally, you need a service like Ngrok.
+   
+    1. install ngrok (brew install ngrok/ngrok/ngrok)
+    2. update ngrok authtoken (ngrok config add-authtoken <TOKEN>)
+    3. create static ngrok domain (https://dashboard.ngrok.com/cloud-edge/domains)
+    4. start ngrok on port 3000
+    5. create webhook in finch using ngrok static domain + /api/finch/webhooks (ex: https://dory-wired-mouse.ngrok-free.app/api/finch/webhooks)
+    6. save webhook secret in app .env variable
+    */
+
 ## Feedback and issues
 
 Please file feedback and issues over on the ...

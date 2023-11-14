@@ -119,10 +119,10 @@ async function handleTestDataSync() {
     const connection = {
         customer_id: "00000000-0000-0000-0000-000000000001",
         company_id: "00000000-0000-0000-0000-000000000002",
-        provider_id: "gusto"
+        provider_id: "finch"
     }
     const customer = {
-        customer_name: "Test Webhook",
+        customer_name: "Test Sponsor",
         company_id: "00000000-0000-0000-0000-000000000002",
         plan_id: "1234567890"
     }
