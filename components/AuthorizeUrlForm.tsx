@@ -112,10 +112,11 @@ export default function AuthorizeUrlForm() {
                             </Switch>
                         </div>
                         <Switch.Label className="text-sm leading-6 text-gray-600">
-                            By selecting this, you agree to our{' '}
+                            Confirm the 'Customer Name' matches the 'Plan ID'
+                            {/* {' '}
                             <a href="#" className="font-semibold text-indigo-600">
                                 privacy&nbsp;policy
-                            </a>
+                            </a> */}
                             .
                         </Switch.Label>
                     </Switch.Group>
