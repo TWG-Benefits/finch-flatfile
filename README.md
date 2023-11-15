@@ -85,20 +85,13 @@ For more information, please contact your Developer Success Engineer or your Acc
 -- Create the Customers table
  create table customers (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
-    name text null,
-    plan_id 
+    customer_name text null,
+    plan_id bigint null,
+    finch_connect_url text null,
     created_at timestamp with time zone not null default now(),
     CONSTRAINT Customers_pkey PRIMARY KEY (id)
   );
   alter table customers enable row level security;
-
-
- -- Insert some sample data
- insert into customers (name)
- values
-   ('Walmart'),
-   ('Chick-Fil-A'),
-   ('Mattress Firm');
 
 -- Create the Connections table
  create table connections (
@@ -118,13 +111,13 @@ For more information, please contact your Developer Success Engineer or your Acc
   );
   alter table connections enable row level security;
 
-  CREATE policy "Authenticated users can read and write to customers"
+  CREATE policy "Authenticated users and anon key can read and write to customers"
   ON customers 
   FOR ALL
   TO anon, authenticated
   USING ( true );
 
-  CREATE policy "Application using anon key can read and write to connections"
+  CREATE policy "Authenticated users and anon key can read and write to connections"
   ON connections 
   FOR ALL
   TO anon, authenticated

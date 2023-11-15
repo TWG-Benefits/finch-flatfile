@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
 import ds from './handle-data-sync';
+import { finchWebhookSecret } from '@/utils/constants';
 
 const finch = new Finch() // no access token since not needed for webhook secret verification
 
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     console.log(`finch-event-id: ${finchEventId}`)
 
     const body = await req.text()
-    const payload = finch.webhooks.unwrap(body, req.headers, process.env.FINCH_WEBHOOK_SECRET) as FinchWebhookPayload
+    const payload = finch.webhooks.unwrap(body, req.headers, finchWebhookSecret) as FinchWebhookPayload
     console.log(payload)
 
     if (payload.event_type == 'test') {

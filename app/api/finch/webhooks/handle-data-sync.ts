@@ -46,7 +46,8 @@ async function handleNewDataSync(companyId: string) {
     const { data: connection, error: connErr } = await supabase.from("connections").select().eq('company_id', companyId)
     if (!connection || connErr) {
         console.log(connErr)
-        throw new Error(connErr?.message)
+        return
+        //throw new Error(connErr?.message)
     }
 
     const newestConnection: Connection = connection[connection.length - 1]
@@ -54,7 +55,8 @@ async function handleNewDataSync(companyId: string) {
     const { data: customer, error: custErr } = await supabase.from("customers").select().eq('id', newestConnection.customer_id).single()
     if (!customer || custErr) {
         console.log(custErr)
-        throw new Error(custErr?.message)
+        return
+        //throw new Error(custErr?.message)
     }
 
     console.log(`CUSTOMER: ${customer?.customer_name}`)
@@ -73,8 +75,10 @@ async function handleNewDataSync(companyId: string) {
     const endDate = now.format("YYYY-MM-DD")
     const startDate = moment().subtract(3, 'months').format("YYYY-MM-DD")
 
-    if (!startDate.match(dateRegex) || !endDate.match(dateRegex))
+    if (!startDate.match(dateRegex) || !endDate.match(dateRegex)) {
         console.log("error: improper start_date or end_date format")
+        return
+    }
 
     // get all the payments in the last 3 months from Finch
     const recentPayments = (await finch.hris.payments.list({ start_date: startDate, end_date: endDate })).items as FinchPayment[]
@@ -86,7 +90,9 @@ async function handleNewDataSync(companyId: string) {
         console.log(lastProcessedPaymentId)
         // but write the newest (i.e. the last) paymentId to the database
         const { error } = await supabase.from("connections").update({ last_processed_payment: recentPayments[recentPayments.length - 1].id }).eq('id', newestConnection.id)
-        console.log(error)
+
+        if (error)
+            console.log(error)
     }
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)

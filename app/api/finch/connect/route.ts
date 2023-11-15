@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { supportEmail } from '@/utils/constants';
-
-const FINCH_CLIENT_ID = process.env.FINCH_CLIENT_ID;
-const FINCH_REDIRECT_URI = process.env.FINCH_REDIRECT_URI ?? 'http://localhost:3000/api/finch/callback';
-const FINCH_PRODUCTS = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement'
-const FINCH_SANDBOX = process.env.FINCH_SANDBOX
+import { finchClientId, finchProducts, finchRedirectUri, isFinchSandbox, supportEmail } from '@/utils/constants';
 
 export async function POST(req: Request) {
   console.log(req.method + " /api/finch/connect");
@@ -23,9 +18,9 @@ export async function POST(req: Request) {
       return NextResponse.json(`There was a problem creating the customer. Try signing out and signing back in. If the problem persists, contact ${supportEmail}.`, { status: 500 })
     }
 
-    const authorizeUrl = (FINCH_SANDBOX === 'true')
-      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customer.id}&sandbox=${FINCH_SANDBOX}`).toString()
-      : new URL(`https://connect.tryfinch.com/authorize?client_id=${FINCH_CLIENT_ID}&products=${FINCH_PRODUCTS}&redirect_uri=${FINCH_REDIRECT_URI}&state=customerName=${customerName}|customerId=${customer.id}`).toString()
+    const authorizeUrl = (isFinchSandbox === 'true')
+      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}&sandbox=${isFinchSandbox}`).toString()
+      : new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}`).toString()
 
 
     // save finch connect url for future reference (like reauthentication events)

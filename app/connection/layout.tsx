@@ -1,12 +1,9 @@
+import { baseUrl } from '@/utils/constants'
 import '../globals.css'
 import Footer from '@/components/Footer'
 
-const defaultUrl = process.env.BASE_URL
-    ? `${process.env.BASE_URL}`
-    : 'http://localhost:3000'
-
 export const metadata = {
-    metadataBase: new URL(defaultUrl),
+    metadataBase: new URL(baseUrl),
     title: 'Finch Retirement App',
     description: 'The fastest way to connect sponsors',
 }

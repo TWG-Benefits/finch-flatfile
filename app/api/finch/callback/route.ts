@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { baseUrl } from '@/utils/constants';
+import { baseUrl, finchApiUrl, finchClientId, finchClientSecret, finchRedirectUri } from '@/utils/constants';
 
 type FinchTokenRes = {
     access_token: string
@@ -40,16 +40,16 @@ export async function GET(req: NextRequest) {
     }
 
     // exchange the temporary authorization code for a permanent access token
-    const authRes = await fetch(`${process.env.FINCH_API_URL}/auth/token`, {
+    const authRes = await fetch(`${finchApiUrl}/auth/token`, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            client_id: process.env.FINCH_CLIENT_ID,
-            client_secret: process.env.FINCH_CLIENT_SECRET,
+            client_id: finchClientId,
+            client_secret: finchClientSecret,
             code: code,
-            redirect_uri: process.env.BASE_URL + "/api/finch/callback"
+            redirect_uri: finchRedirectUri
         })
     })
 
