@@ -91,6 +91,10 @@ async function handleNewDataSync(companyId: string) {
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
 
+    // if no new pay statements, then don't create file
+    if (!newPayments)
+        return
+
     // get the Finch pay statements for all new payments
     const payStatements = (await finch.hris.payStatements.retrieveMany({
         requests: newPayments.map(payment => {
