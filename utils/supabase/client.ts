@@ -1,3 +1,5 @@
+"use client"
+
 import { Database } from '@/types/database'
 import { createBrowserClient } from '@supabase/ssr'
 

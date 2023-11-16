@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { headers, cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { supportEmail } from '@/utils/constants'
 
 export default function Login({
   searchParams,
@@ -104,6 +105,9 @@ export default function Login({
         >
           Sign In
         </button>
+        <p className="mt-2 text-lg leading-8 text-gray-600 text-center">
+          If you do not have an account, contact <a href={`mailto:${supportEmail}`} className='text-indigo-600'>{supportEmail}</a>.
+        </p>
         {/* <button
           formAction={signUp}
           className="border border-foreground/20 rounded-md px-4 py-2 text-foreground mb-2"
@@ -111,7 +115,7 @@ export default function Login({
           Sign Up
         </button> */}
         {searchParams?.message && (
-          <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
+          <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center rounded">
             {searchParams.message}
           </p>
         )}
