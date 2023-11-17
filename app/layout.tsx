@@ -5,8 +5,8 @@ import { baseUrl } from '@/utils/constants'
 
 export const metadata = {
   metadataBase: new URL(baseUrl),
-  title: 'Finch Retirement App',
-  description: 'The fastest way to connect sponsors',
+  title: 'Finch Flatfile',
+  description: 'The fastest way to integrate with employers',
 }
 
 export default function RootLayout({

@@ -43,6 +43,7 @@ async function handleNewDataSync(companyId: string) {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore);
 
+    // get all connections for this company
     const { data: connection, error: connErr } = await supabase.from("connections").select().eq('company_id', companyId)
     if (!connection || connErr) {
         console.log(connErr)
@@ -50,6 +51,7 @@ async function handleNewDataSync(companyId: string) {
         //throw new Error(connErr?.message)
     }
 
+    // only get the newest connection (if there are multiple for this company)
     const newestConnection: Connection = connection[connection.length - 1]
 
     const { data: customer, error: custErr } = await supabase.from("customers").select().eq('id', newestConnection.customer_id).single()
@@ -97,9 +99,11 @@ async function handleNewDataSync(companyId: string) {
 
     const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
 
-    // if no new pay statements, then don't create file
-    if (!newPayments)
+    // if no new pay statements (empty array), then don't create file
+    if (!newPayments.length) {
+        console.log(`No new pay statements for company ${customer.customer_name}`)
         return
+    }
 
     // get the Finch pay statements for all new payments
     const payStatements = (await finch.hris.payStatements.retrieveMany({
@@ -135,7 +139,7 @@ async function handleTestDataSync() {
         provider_id: "finch"
     }
     const customer = {
-        customer_name: "Test Sponsor",
+        customer_name: "Test Webhook",
         company_id: "00000000-0000-0000-0000-000000000002",
         plan_id: "1234567890"
     }
@@ -320,6 +324,12 @@ async function handleTestDataSync() {
         }
     ]
     const lastProcessedPaymentId = "2a7f754a-9cfd-4c4f-97a3-4094048398a1"
+
+
+    // should return [ "db5c608c-14fa-4bdd-a45b-48552540e9d4" ]
+    const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
+    //console.log(newPayments)
+
     // pay statement for db5c608c-14fa-4bdd-a45b-48552540e9d4
     const payStatements: FinchPayStatementRes[] = [{
         "payment_id": "db5c608c-14fa-4bdd-a45b-48552540e9d4",
@@ -1392,9 +1402,11 @@ async function handleTestDataSync() {
         }
     }]
 
-    // should return [ "db5c608c-14fa-4bdd-a45b-48552540e9d4" ]
-    const newPayments = getAllNewPayments(recentPayments, lastProcessedPaymentId)
-    //console.log(newPayments)
+    // if no new pay statements (empty array), then don't create file
+    if (!newPayments.length) {
+        console.log(`No new pay statements for company ${customer.customer_name}`)
+        return
+    }
 
     // For each pay-statement, match the individual pay-statements with the payment details
     payStatements.forEach(response => {

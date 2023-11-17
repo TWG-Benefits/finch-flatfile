@@ -120,7 +120,7 @@ export default function AuthorizeUrlForm() {
                             </Switch>
                         </div>
                         <Switch.Label className="text-sm leading-6 text-gray-600">
-                            Confirm that the Customer Name matches the Plan Id in your system
+                            Confirm that the Customer Name matches the correct Plan Id in your system
                             {/* {' '}
                             <a href="#" className="font-semibold text-indigo-600">
                                 privacy&nbsp;policy
