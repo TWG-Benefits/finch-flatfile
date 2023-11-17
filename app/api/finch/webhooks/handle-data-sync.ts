@@ -125,7 +125,7 @@ async function handleNewDataSync(companyId: string) {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${companyId}-${newestConnection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`); // could include payDate if broken out by each file
+        await sftpClient.putCSV(csv, `/Finch/Inbox/${customer.plan_id}-${newestConnection.company_id}-${newestConnection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
@@ -140,7 +140,7 @@ async function handleTestDataSync() {
     }
     const customer = {
         customer_name: "Test Webhook",
-        company_id: "00000000-0000-0000-0000-000000000002",
+        //company_id: "00000000-0000-0000-0000-000000000002",
         plan_id: "1234567890"
     }
     const payDate = "2023-9-31"
@@ -1694,7 +1694,7 @@ async function handleTestDataSync() {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/${customer.customer_name}/finch-${connection.company_id}-${connection.provider_id}-payroll-${moment().format('YYYY-MM-DD')}.csv`);
+        await sftpClient.putCSV(csv, `/Finch/Inbox/${customer.plan_id}-${connection.company_id}-${connection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);

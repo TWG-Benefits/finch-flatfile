@@ -1,6 +1,8 @@
 let SFTPClient = require('ssh2-sftp-client');
 import { Readable } from 'stream';
 
+const remotePath = process.env.SFTP_PATH
+
 
 export function createSFTPClient() {
     const sftp = new SFTPClient();
