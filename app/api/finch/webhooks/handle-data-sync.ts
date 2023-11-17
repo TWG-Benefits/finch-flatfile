@@ -1694,7 +1694,7 @@ async function handleTestDataSync() {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
-        await sftpClient.putCSV(csv, `/Finch/Inbox/${customer.plan_id}-${connection.company_id}-${connection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
+        await sftpClient.putCSV(csv, `SFTPRoot/Finch/Inbox/${customer.plan_id}-${connection.company_id}-${connection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
         console.error('An error occurred:', error);
