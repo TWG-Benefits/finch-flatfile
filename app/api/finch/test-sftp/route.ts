@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createSFTPClient } from '@/utils/sftp';
 import moment from "moment";
 
-const sftpClient = createSFTPClient()
 const sftpPath = process.env.SFTP_PATH
 const testSftpKey = process.env.TEST_SFTP_KEY
 
@@ -21,6 +20,7 @@ export async function POST(req: Request) {
     try {
         if (test_sftp_key == testSftpKey) {
             console.log("Sending CSV file to SFTP")
+            const sftpClient = createSFTPClient()
             await sftpClient.putCSV(csv, `${sftpPath}/finch-test-${moment().format('YYYY-MM-DD')}.csv`);
             console.log('File uploaded via SFTP successfully');
 

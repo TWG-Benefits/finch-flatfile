@@ -6,9 +6,6 @@ import { createSFTPClient } from '@/utils/sftp';
 import { Connection, Customer } from '@/types/database';
 import { UUID } from 'crypto';
 
-
-const sftpClient = createSFTPClient()
-
 // yyyy-mm-dd, including leap years
 const dateRegex = /^(?:(?:1[6-9]|[2-9]\d)?\d{2})(?:(?:(\/|-|\.)(?:0?[13578]|1[02])\1(?:31))|(?:(\/|-|\.)(?:0?[13-9]|1[0-2])\2(?:29|30)))$|^(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\/|-|\.)0?2\3(?:29)$|^(?:(?:1[6-9]|[2-9]\d)?\d{2})(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:0?[1-9]|1\d|2[0-8])$/
 
@@ -125,6 +122,7 @@ async function handleNewDataSync(companyId: string) {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
+        const sftpClient = createSFTPClient()
         await sftpClient.putCSV(csv, `/Finch/Inbox/${customer.plan_id}-${newestConnection.company_id}-${newestConnection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
@@ -1694,6 +1692,7 @@ async function handleTestDataSync() {
     const csv = convertPayrollToFile(individuals, newPayments)
 
     try {
+        const sftpClient = createSFTPClient()
         await sftpClient.putCSV(csv, `/Finch/Inbox/${customer.plan_id}-${connection.company_id}-${connection.provider_id}-${moment().format('YYYY-MM-DD')}.csv`);
         console.log('File uploaded via SFTP successfully');
     } catch (error) {
