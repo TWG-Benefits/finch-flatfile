@@ -85,6 +85,7 @@ async function handleNewPayment(company_id: string, payment_id: string, pay_date
 
     const status = await sendCSV(csv, customer.customer_name, connection.provider_id, customer.plan_id, pay_date)
 
+    return
 }
 
 async function handleNewDataSync(companyId: string) {
@@ -204,7 +205,19 @@ async function handleNewDataSync(companyId: string) {
     }
 }
 
-export default { handleNewDataSync, handleNewPayment }
+async function handleTestWebhook() {
+    const csv = `
+    ID,Name,Department
+    1,John Doe,Finance
+    2,Jane Smith,Marketing
+    3,Emily Johnson,Human Resources
+    4,Michael Brown,IT
+    `
+    const status = await sendCSV(csv, "TESTING", "finch", 1234567890, moment().format("YYYY-MM-DD"))
+
+}
+
+export default { handleNewDataSync, handleNewPayment, handleTestWebhook }
 
 function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: string): PayData[] {
     let foundLastProcessed = false;

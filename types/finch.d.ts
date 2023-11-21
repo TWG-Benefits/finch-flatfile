@@ -228,6 +228,7 @@ type FinchPayStatement = {
     }[] | null
 }
 
+
 interface FinchWebhookEvent {
     company_id: string;
     account_id: string;
@@ -238,24 +239,29 @@ interface FinchWebhookEvent {
 // Define the DataSyncAll event type
 interface DataSyncAllWebhook extends FinchWebhookEvent {
     event_type: 'job.data_sync_all.completed';
-    data: PaymentCreatedData;
+    data: JobData;
+}
+interface JobData {
+    job_id: string;
+    job_url: string;
 }
 
 interface TestWebhook extends FinchWebhookEvent {
-    event_type: 'test';
-    data: PaymentCreatedData;
+    event_type: 'test'
+    data: any
 }
 
-// Define the PaymentCreated event type
 interface PaymentWebhook extends FinchWebhookEvent {
     event_type: 'payment.created';
     data: PaymentCreatedData;
 }
 // Define a specific structure for payment.created event data
 interface PaymentCreatedData {
-    payment_id: string; // UUID type can be represented as a string in TypeScript
+    payment_id: string;
     pay_date: string; // Format: "MM-DD-YYYY"
 }
 
-type FinchWebhook = PaymentWebhook | DataSyncAllWebhook // | AnotherEventType | ...
+
+
+type FinchWebhook = PaymentWebhook | DataSyncAllWebhook | TestWebhook // | AnotherEventType | ...
 
