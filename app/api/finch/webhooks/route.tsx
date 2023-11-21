@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
-import ds from './handle-data-sync';
+import wh from './handle-webhook';
 import { finchWebhookSecret } from '@/utils/constants';
+import { FinchWebhookEvent } from '@/types/finch';
 
 const finch = new Finch() // no access token since not needed for webhook secret verification
 
@@ -17,11 +18,26 @@ export async function POST(req: Request) {
     console.log(`finch-event-id: ${finchEventId}`)
 
     const body = await req.text()
-    const payload = finch.webhooks.unwrap(body, req.headers, finchWebhookSecret) as FinchWebhookPayload
+    const payload: FinchWebhookEvent = finch.webhooks.unwrap(body, req.headers, finchWebhookSecret)
     console.log(payload)
 
     if (payload.event_type == 'test') {
-        await ds.handleTestDataSync().then(() => {
+        // await ds.handleTestDataSync().then(() => {
+        //     return new NextResponse(
+        //         JSON.stringify({ ok: true })
+        //     )
+        // })
+
+        console.log(payload)
+
+        return new NextResponse(
+            JSON.stringify({ ok: true })
+        )
+    }
+
+    if (payload.event_type == 'payment.created') {
+        const paymentEvent: PaymentWebhook = payload
+        await wh.handleNewPayment(paymentEvent.company_id, paymentEvent.data.payment_id, paymentEvent.data.pay_date).then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })
             )
@@ -29,7 +45,8 @@ export async function POST(req: Request) {
     }
 
     if (payload.event_type == 'job.data_sync_all.completed') {
-        await ds.handleNewDataSync(payload.company_id).then(() => {
+        const paymentEvent: PaymentWebhook = payload
+        await wh.handleNewDataSync(paymentEvent.company_id).then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })
             )
