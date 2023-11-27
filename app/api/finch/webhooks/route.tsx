@@ -32,25 +32,33 @@ export async function POST(req: Request) {
 
     if (payload.event_type == 'payment.created') {
         const paymentEvent = payload as PaymentWebhook
-        await wh.handleNewPayment(paymentEvent.company_id, paymentEvent.data.payment_id, paymentEvent.data.pay_date).then(() => {
+        await wh.handleNewPayment(paymentEvent.company_id, paymentEvent.data.payment_id, paymentEvent.data.pay_date).then(success => {
+
+            if (success == false)
+                return NextResponse.json(`Error`, { status: 500 })
+
+            return NextResponse.json(`Success`, { status: 200 })
+
+        })
+    }
+
+    if (payload.event_type == 'account.updated') {
+        const accountUpdatedEvent = payload as AccountUpdateWebhook
+        await wh.handleAccountUpdated(accountUpdatedEvent).then(() => {
             return new NextResponse(
                 JSON.stringify({ ok: true })
             )
         })
     }
 
-    if (payload.event_type == 'job.data_sync_all.completed') {
-        const paymentEvent = payload as DataSyncAllWebhook
-        await wh.handleNewDataSync(paymentEvent.company_id).then(() => {
-            return new NextResponse(
-                JSON.stringify({ ok: true })
-            )
-        })
-    }
+    // if (payload.event_type == 'job.data_sync_all.completed') {
+    //     const paymentEvent = payload as DataSyncAllWebhook
+    //     await wh.handleNewDataSync(paymentEvent.company_id).then(() => {
+    //         return new NextResponse(
+    //             JSON.stringify({ ok: true })
+    //         )
+    //     })
+    // }
 
-    // TODO: filter on finchEventType = new payroll
-
-    return new NextResponse(
-        JSON.stringify({ ok: true })
-    )
+    return NextResponse.json(`Webhook not handled`, { status: 200 })
 }

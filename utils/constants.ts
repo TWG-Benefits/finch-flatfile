@@ -4,7 +4,7 @@ export const sandboxApiUrl = process.env.FINCH_SANDBOX_URL ?? 'https://sandbox.t
 export const appName = process.env.APP_NAME ?? 'Acme Co.'
 export const supportEmail = process.env.SUPPORT_EMAIL ?? 'developers@tryfinch.com'
 
-export const finchProducts = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement benefits'
+export const finchProducts = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement benefits ssn'
 export const finchRedirectUri = process.env.FINCH_REDIRECT_URI ?? baseUrl + '/api/finch/callback'
 export const isFinchSandbox = process.env.IS_FINCH_SANDBOX ?? true
 

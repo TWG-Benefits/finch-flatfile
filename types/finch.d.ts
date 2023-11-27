@@ -63,7 +63,19 @@ type FinchDirectory = {
         count: number
         offset: number
     },
-    individuals: FinchEmployee[]
+    individuals: {
+        id: string,
+        first_name: string,
+        middle_name: string,
+        last_name: string
+        manager: {
+            id: string | null
+        },
+        department: {
+            name: string
+        },
+        is_active: boolean
+    }[]
 }
 
 type FinchEmployee = {
@@ -80,6 +92,11 @@ type FinchEmployee = {
     is_active: boolean
 }
 
+type FinchIndividualRes = {
+    individual_id: string,
+    code: number,
+    body: FinchIndividual
+}[]
 type FinchIndividual = {
     id: string,
     first_name: string | null,
@@ -97,7 +114,7 @@ type FinchIndividual = {
     gender: 'female' | 'male' | 'other' | 'decline_to_specify' | null,
     ethnicity: 'asian' | 'white' | 'black_or_african_american' | 'native_hawaiian_or_pacific_islander' | 'american_indian_or_alaska_native' | 'hispanic_or_latino' | 'two_or_more_races' | 'decline_to_specify' | null,
     dob: string,
-    ssn: string,
+    ssn?: string,
     residence: {
         line1: string,
         line2: string,
@@ -107,7 +124,11 @@ type FinchIndividual = {
         country: string
     }
 }
-
+type FinchEmploymentRes = {
+    individual_id: string,
+    code: number,
+    body: FinchIndividualEmployment
+}[]
 type FinchIndividualEmployment = {
     id: string,
     first_name: string | null,
@@ -178,8 +199,18 @@ type FinchPayment = {
     employee_taxes: Money
     individual_ids: string[];
 }
-
 type FinchPayStatement = {
+    payment_id: string,
+    code: number,
+    body: {
+        paging: {
+            count: number,
+            offset: number
+        },
+        pay_statements: FinchIndividualPayStatement[]
+    }
+}
+type FinchIndividualPayStatement = {
     individual_id: string,
     type: 'regular_payroll' | 'off_cycle_payroll' | 'one_time_payment' | null,
     payment_method: 'check' | 'direct_deposit' | null,
@@ -229,14 +260,26 @@ type FinchPayStatement = {
 }
 
 
+
+
 interface FinchWebhookEvent {
     company_id: string;
     account_id: string;
     event_type: string;
-    data: any; // "any" type will be replaced by specific event data types
+    data: any; // "any" type will be replaced by specific event data types since each webhook has its own "data" structure
 }
 
-// Define the DataSyncAll event type
+
+// Define Account Update Webhooks
+interface AccountUpdateWebhook extends FinchWebhookEvent {
+    event_type: 'account.update';
+    data: StatusData;
+}
+interface StatusData {
+    status: 'pending' | 'processing' | 'connected' | 'error_permissions' | 'error_reauth' | 'error_no_acount_setup';
+    authentication_method: 'credential' | 'api_token' | 'oauth' | 'assisted';
+}
+
 interface DataSyncAllWebhook extends FinchWebhookEvent {
     event_type: 'job.data_sync_all.completed';
     data: JobData;
@@ -260,6 +303,7 @@ interface PaymentCreatedData {
     payment_id: string;
     pay_date: string; // Format: "MM-DD-YYYY"
 }
+
 
 
 
