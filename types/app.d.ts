@@ -1,3 +1,18 @@
+type FinchRequiredData = {
+    individuals: FinchIndividualRes,
+    employments: FinchEmploymentRes,
+    payment: FinchPayment,
+    payStatement: FinchPayStatement,
+    ytdPayStatements: FinchPayStatement[]
+}
+type FinchResponseData = {
+    individuals: FinchIndividualRes | null | undefined,
+    employments: FinchEmploymentRes | null | undefined,
+    payment: FinchPayment | null | undefined,
+    payStatement: FinchPayStatement | null | undefined,
+    ytdPayStatements: FinchPayStatement[] | null | undefined
+}
+
 type CSVRow = {
     plan_id: number; // stored in customer table in db
     finch_individual_id: string;
