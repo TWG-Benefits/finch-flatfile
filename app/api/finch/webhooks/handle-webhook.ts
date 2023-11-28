@@ -8,14 +8,6 @@ import convertFileToCSV from './convert-file-to-CSV';
 import processPayment from './process-payment';
 import { getFinchData, validateFinchData } from './finch';
 
-// yyyy-mm-dd, including leap years
-const dateRegex = /^(?:(?:1[6-9]|[2-9]\d)?\d{2})(?:(?:(\/|-|\.)(?:0?[13578]|1[02])\1(?:31))|(?:(\/|-|\.)(?:0?[13-9]|1[0-2])\2(?:29|30)))$|^(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\/|-|\.)0?2\3(?:29)$|^(?:(?:1[6-9]|[2-9]\d)?\d{2})(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:0?[1-9]|1\d|2[0-8])$/
-
-type PayData = {
-    payment_id: string,
-    pay_date: string | null,
-    pay_statements: FinchIndividualPayStatement[]
-}
 
 async function handleNewPayment(companyId: string, paymentId: string, payDate: string): Promise<boolean> {
     const cookieStore = cookies()
@@ -61,7 +53,7 @@ async function handleNewPayment(companyId: string, paymentId: string, payDate: s
 async function handleNewDataSync(companyId: string) {
     // call /jobs
     // sort by created_at to get first job
-    // only continue if first job
+    // only continue if webhook.data.job_id equals first job_id from /jobs
     // get historical data
     // process
     // convert
@@ -210,33 +202,6 @@ async function handleTestWebhook(): Promise<boolean> {
 }
 
 export default { handleNewPayment, handleAccountUpdated, handleTestWebhook }
-
-function getAllNewPayments(payments: FinchPayment[], lastProcessedPaymentId: string): PayData[] {
-    let foundLastProcessed = false;
-
-    // Assuming that if lastProcessedPaymentId is not found, all payments are new
-    if (!payments.some(payment => payment.id === lastProcessedPaymentId)) {
-        foundLastProcessed = true;
-    }
-
-    const results: PayData[] = [];
-
-    for (const payment of payments) {
-        if (foundLastProcessed) {
-            results.push({
-                payment_id: payment.id,
-                pay_date: payment.pay_date,
-                pay_statements: [] // we will add this later once we call the /pay-statements endpoint
-            });
-        }
-
-        if (payment.id === lastProcessedPaymentId) {
-            foundLastProcessed = true;
-        }
-    }
-
-    return results;
-}
 
 async function sendCSV(csv: string, customerName: string, providerId: string, planId: number, payDate: string): Promise<boolean> {
     try {

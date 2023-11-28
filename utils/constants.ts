@@ -1,3 +1,6 @@
+// yyyy-mm-dd, including leap years
+export const dateRegex = /^(?:(?:1[6-9]|[2-9]\d)?\d{2})(?:(?:(\/|-|\.)(?:0?[13578]|1[02])\1(?:31))|(?:(\/|-|\.)(?:0?[13-9]|1[0-2])\2(?:29|30)))$|^(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\/|-|\.)0?2\3(?:29)$|^(?:(?:1[6-9]|[2-9]\d)?\d{2})(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:0?[1-9]|1\d|2[0-8])$/
+
 export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000'
 export const finchApiUrl = process.env.FINCH_API_URL ?? 'https://api.tryfinch.com'
 export const sandboxApiUrl = process.env.FINCH_SANDBOX_URL ?? 'https://sandbox.tryfinch.com/api'
@@ -13,6 +16,7 @@ export const finchClientId = process.env.FINCH_CLIENT_ID ?? 'FINCH_CLIENT_ID not
 export const finchClientSecret = process.env.FINCH_CLIENT_SECRET ?? 'FINCH_CLIENT_SECRET not entered as app environment variable'
 export const finchWebhookSecret = process.env.FINCH_WEBHOOK_SECRET ?? 'FINCH_WEBHOOK_SECRET not entered as app environment variable'
 
+// TODO: check for all required environment variables
 // Ensure all required configuration is present
 // const requiredConfig = ['SFTP_HOST', 'SFTP_USERNAME'];
 // for (const configKey of requiredConfig) {
