@@ -8,7 +8,6 @@ import { UUID } from 'crypto';
 import convertPayrollToFile from './convert-payroll-to-file';
 import { NextResponse } from 'next/server';
 import convertPaymentToFile from './convert-payment-to-file';
-import { ok } from 'assert';
 
 const sftpPath = process.env.SFTP_PATH
 
@@ -229,11 +228,11 @@ async function handleNewPayment(company_id: string, payment_id: string, pay_date
 //     }
 // }
 
-async function handleAccountUpdated(event: AccountUpdateWebhook) {
-
+async function handleAccountUpdated(event: AccountUpdateWebhook): Promise<boolean> {
+    return true
 }
 
-async function handleTestWebhook() {
+async function handleTestWebhook(): Promise<boolean> {
     const csv = `
     ID,Name,Department
     1,John Doe,Finance
@@ -246,8 +245,10 @@ async function handleTestWebhook() {
         const sftpClient = createSFTPClient()
         const status = await sendCSV(csv, "TESTING", "finch", 1234567890, moment().format("YYYY-MM-DD"))
         console.log('File uploaded via SFTP successfully');
+        return status
     } catch (error) {
         console.error('An error occurred:', error);
+        return false
     }
 }
 
@@ -284,7 +285,7 @@ async function sendCSV(csv: string, customerName: string, providerId: string, pl
 
     try {
         const sftpClient = createSFTPClient()
-        await sftpClient.putCSV(csv, `/${customerName}/finch-${planId}-${providerId}-${payDate}.csv`);
+        await sftpClient.putCSV(csv, `/TESTING/finch-test-${payDate}.csv`);
         console.log('File uploaded via SFTP successfully');
         return true
     } catch (error) {

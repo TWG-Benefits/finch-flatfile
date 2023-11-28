@@ -23,31 +23,33 @@ export async function POST(req: Request) {
     if (payload.event_type == 'test') {
         console.log(payload)
 
-        await wh.handleTestWebhook().then(() => {
-            return new NextResponse(
-                JSON.stringify({ ok: true })
-            )
+        await wh.handleTestWebhook().then(success => {
+            if (success == true)
+                return NextResponse.json(`Success`, { status: 200 })
+
+            return NextResponse.json(`Error`, { status: 500 })
+
         })
     }
 
     if (payload.event_type == 'payment.created') {
         const paymentEvent = payload as PaymentWebhook
         await wh.handleNewPayment(paymentEvent.company_id, paymentEvent.data.payment_id, paymentEvent.data.pay_date).then(success => {
-
-            if (success == false)
+            if (success)
+                return NextResponse.json(`Success`, { status: 200 })
+            else
                 return NextResponse.json(`Error`, { status: 500 })
-
-            return NextResponse.json(`Success`, { status: 200 })
 
         })
     }
 
     if (payload.event_type == 'account.updated') {
         const accountUpdatedEvent = payload as AccountUpdateWebhook
-        await wh.handleAccountUpdated(accountUpdatedEvent).then(() => {
-            return new NextResponse(
-                JSON.stringify({ ok: true })
-            )
+        await wh.handleAccountUpdated(accountUpdatedEvent).then(success => {
+            if (success)
+                return NextResponse.json(`Success`, { status: 200 })
+            else
+                return NextResponse.json(`Error`, { status: 500 })
         })
     }
 
