@@ -1,4 +1,4 @@
-export default function convertPayStatementToFile(plan_id: number, individuals: FinchIndividualRes, employments: FinchEmploymentRes, payment: FinchPayment, payStatement: FinchPayStatement, ytdPayStatements: FinchPayStatement[]): string {
+export default function convertPayStatementToFile(file: CSVRow[]): string {
     const headers = [
         "Finch Individual ID",
         "Social Security Number",
