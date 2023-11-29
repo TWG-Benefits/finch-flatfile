@@ -1,7 +1,8 @@
+import { startDateForData } from "@/utils/constants"
 import Finch from "@tryfinch/finch-api"
 import moment from "moment"
 
-async function getFinchData(token: string, paymentId: string): Promise<FinchResponseData> {
+async function getFinchData(token: string, paymentId: string | null = null): Promise<FinchResponseData> {
     // Init Finch SDK
     const finch = new Finch({
         accessToken: token
@@ -33,31 +34,41 @@ async function getFinchData(token: string, paymentId: string): Promise<FinchResp
         })
     })).responses as FinchPayStatement[]
 
-    // Validate that all pay statements have data
-    // Trying to avoid 'data_sync_in_progress' 202 status codes (https://developer.tryfinch.com/docs/documentation/ns3poq7m3l2m0-data-syncs#pay-statements)
-    // const invalidPayStatements = ytdPayStatements.filter(obj => obj.code !== 200)
-    // if (invalidPayStatements.length !== 0) {
-    //     console.log(`Error in YTD Pay Statements`)
-    //     console.log(invalidPayStatements)
-    //     return false
-    // }
 
-    // FINCH: Get the new pay statement specified in the webhook
-    const payment = ytdPayments.find(payment => payment.id == paymentId)
-    const payStatement = ytdPayStatements.find(payStatement => payStatement.payment_id == paymentId)
+    let payments = null
+    let payStatements = null
 
-    //console.log(payStatement)
+    if (paymentId) {
+        // Get data for a single, new pay statement specified in the webhook
+        const payment = ytdPayments.find(payment => payment.id == paymentId)
+        payments = payment ? [payment] : null
 
-    // if (payStatement.code !== 200) {
-    //     console.log(`Error for pay statement ${payStatement.payment_id}.`)
-    //     return false
-    // }
+        const payStatement = ytdPayStatements.find(payStatement => payStatement.payment_id == paymentId)
+        payStatements = payStatement ? [payStatement] : null
+    } else {
+        // If a start data to get data is specified in environment variables use that date
+        if (startDateForData) {
+            const endDate = moment().format("YYYY-MM-DD")
+            payments = (await finch.hris.payments.list({ start_date: startDateForData, end_date: endDate })).items as FinchPayment[]
+            payStatements = (await finch.hris.payStatements.retrieveMany({
+                requests: ytdPayments.map(payment => {
+                    return { payment_id: payment.id }
+                })
+            })).responses as FinchPayStatement[]
+
+        } else {
+            // Otherwise, just return YTD historical data on the first pull
+            payments = ytdPayments
+            payStatements = ytdPayStatements
+        }
+
+    }
 
     return {
         individuals,
         employments,
-        payment,
-        payStatement,
+        payments: payments,
+        payStatements: payStatements,
         ytdPayStatements
     }
 }
@@ -68,8 +79,8 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
         return { success: false, data: null }
     }
 
-    if (!finch.payment || !finch.payStatement) {
-        console.error(`No payment ${finch.payment?.id} exists`)
+    if (!finch.payments || !finch.payStatements) {
+        console.error(`No payments exists`)
         return { success: false, data: null }
     }
 
@@ -80,15 +91,17 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
 
     // Validate that all pay statements have data
     // Trying to avoid 'data_sync_in_progress' 202 status codes (https://developer.tryfinch.com/docs/documentation/ns3poq7m3l2m0-data-syncs#pay-statements)
-    const invalidPayStatements = finch.ytdPayStatements.filter(obj => obj.code !== 200)
-    if (invalidPayStatements.length !== 0) {
-        console.log(`Error in YTD Pay Statements`)
-        console.log(invalidPayStatements)
+    const invalidYtdPayStatements = finch.ytdPayStatements.filter(obj => obj.code !== 200)
+    if (invalidYtdPayStatements.length !== 0) {
+        console.log(`Error in YTD pay statements`)
+        console.log(invalidYtdPayStatements)
         return { success: false, data: null }
     }
 
-    if (finch.payStatement.code !== 200) {
-        console.log(`Error for pay statement ${finch.payStatement.payment_id}.`)
+    const invalidPayStatements = finch.payStatements.filter(obj => obj.code !== 200)
+    if (invalidYtdPayStatements.length !== 0) {
+        console.log(`Error in current pay statements`)
+        console.log(invalidYtdPayStatements)
         return { success: false, data: null }
     }
 
@@ -97,8 +110,8 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
         data: {
             individuals: finch.individuals,
             employments: finch.employments,
-            payment: finch.payment,
-            payStatement: finch.payStatement,
+            payments: finch.payments,
+            payStatements: finch.payStatements,
             ytdPayStatements: finch.ytdPayStatements
         }
     }

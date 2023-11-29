@@ -259,6 +259,33 @@ type FinchIndividualPayStatement = {
     }[] | null
 }
 
+interface FinchJob {
+    job_id: string;
+    job_url: string;
+    status: string;
+    created_at: string;
+    scheduled_at: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+    type: string;
+}
+
+interface FinchAutomatedJobsResponse {
+    paging: {
+        count: number;
+        offset: number;
+    };
+    meta: {
+        quotas: {
+            data_sync_all: {
+                allowed_refreshes: number;
+                remaining_refreshes: number;
+            };
+        };
+    };
+    data: Job[];
+}
+
 
 
 

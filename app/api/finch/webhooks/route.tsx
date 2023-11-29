@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     if (payload.event_type == 'payment.created') {
         const paymentEvent = payload as PaymentWebhook
-        await wh.handleNewPayment(paymentEvent.company_id, paymentEvent.data.payment_id, paymentEvent.data.pay_date).then(success => {
+        await wh.handleNewPayment(paymentEvent).then(success => {
             if (success)
                 return NextResponse.json(`Success`, { status: 200 })
             else
@@ -53,14 +53,14 @@ export async function POST(req: Request) {
         })
     }
 
-    // if (payload.event_type == 'job.data_sync_all.completed') {
-    //     const paymentEvent = payload as DataSyncAllWebhook
-    //     await wh.handleNewDataSync(paymentEvent.company_id).then(() => {
-    //         return new NextResponse(
-    //             JSON.stringify({ ok: true })
-    //         )
-    //     })
-    // }
+    if (payload.event_type == 'job.data_sync_all.completed') {
+        const paymentEvent = payload as DataSyncAllWebhook
+        await wh.handleNewDataSync(paymentEvent).then(() => {
+            return new NextResponse(
+                JSON.stringify({ ok: true })
+            )
+        })
+    }
 
     return NextResponse.json(`Webhook not handled`, { status: 200 })
 }

@@ -1,15 +1,15 @@
 type FinchRequiredData = {
     individuals: FinchIndividualRes,
     employments: FinchEmploymentRes,
-    payment: FinchPayment,
-    payStatement: FinchPayStatement,
+    payments: FinchPayment[],
+    payStatements: FinchPayStatement[],
     ytdPayStatements: FinchPayStatement[]
 }
 type FinchResponseData = {
     individuals: FinchIndividualRes | null | undefined,
     employments: FinchEmploymentRes | null | undefined,
-    payment: FinchPayment | null | undefined,
-    payStatement: FinchPayStatement | null | undefined,
+    payments: FinchPayment[] | null | undefined,
+    payStatements: FinchPayStatement[] | null | undefined,
     ytdPayStatements: FinchPayStatement[] | null | undefined
 }
 
