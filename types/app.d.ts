@@ -3,14 +3,16 @@ type FinchRequiredData = {
     employments: FinchEmploymentRes,
     payments: FinchPayment[],
     payStatements: FinchPayStatement[],
-    ytdPayStatements: FinchPayStatement[]
+    ytdPayStatements: FinchPayStatement[],
+    dataRefreshDate: string
 }
 type FinchResponseData = {
     individuals: FinchIndividualRes | null | undefined,
     employments: FinchEmploymentRes | null | undefined,
     payments: FinchPayment[] | null | undefined,
     payStatements: FinchPayStatement[] | null | undefined,
-    ytdPayStatements: FinchPayStatement[] | null | undefined
+    ytdPayStatements: FinchPayStatement[] | null | undefined,
+    dataRefreshDate: string | null
 }
 
 type CSVRow = {

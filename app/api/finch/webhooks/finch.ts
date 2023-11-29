@@ -9,6 +9,7 @@ async function getFinchData(token: string, paymentId: string | null = null): Pro
     })
 
     // FINCH: Get the full list of active employees at the company (/directory + /individual + /employment)
+    const dataRefreshDate = (await finch.hris.company.retrieve().asResponse()).headers.get('finch-data-retrieved')
     const directory = (await finch.hris.directory.list()).individuals.filter(ind => ind.is_active == true) as FinchEmployee[]
     const individuals = (await finch.hris.individuals.retrieveMany({
         options: {
@@ -69,7 +70,8 @@ async function getFinchData(token: string, paymentId: string | null = null): Pro
         employments,
         payments: payments,
         payStatements: payStatements,
-        ytdPayStatements
+        ytdPayStatements,
+        dataRefreshDate
     }
 }
 
@@ -99,7 +101,7 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
     }
 
     const invalidPayStatements = finch.payStatements.filter(obj => obj.code !== 200)
-    if (invalidYtdPayStatements.length !== 0) {
+    if (invalidPayStatements.length !== 0) {
         console.log(`Error in current pay statements`)
         console.log(invalidYtdPayStatements)
         return { success: false, data: null }
@@ -112,7 +114,8 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
             employments: finch.employments,
             payments: finch.payments,
             payStatements: finch.payStatements,
-            ytdPayStatements: finch.ytdPayStatements
+            ytdPayStatements: finch.ytdPayStatements,
+            dataRefreshDate: `This data was retrieved ${moment(finch.dataRefreshDate).fromNow()} on ${moment(finch.dataRefreshDate).format("dddd, MMMM Do YYYY, h:mm:ss a")}`
         }
     }
 }

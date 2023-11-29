@@ -45,6 +45,7 @@ export default function processPayments(plan_id: number, finch: FinchRequiredDat
                 pay_period_start_date: payPeriodStartDate,
                 pay_period_end_date: payPeriodEndDate,
                 pay_frequency_code: payFrequencyCode,
+
                 deduction_401k_amount: sumAmountsForType(paycheck.employee_deductions, '401k') ?? 0,
                 contribution_401k_match_amount: sumAmountsForType(paycheck.employer_contributions, '401k') ?? 0,
                 deduction_roth_401k_amount: sumAmountsForType(paycheck.employee_deductions, '401k_roth') ?? 0,
