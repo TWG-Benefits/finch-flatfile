@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     }
 
     const authorizeUrl = (isFinchSandbox === 'true')
-      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}&sandbox=${isFinchSandbox}`).toString()
-      : new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}`).toString()
+      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}%7CcustomerId=${customer.id}&sandbox=${isFinchSandbox}`).toString()
+      : new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}%7CcustomerId=${customer.id}`).toString()
 
 
     // save finch connect url for future reference (like reauthentication events)
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     return new NextResponse(
-      JSON.stringify(encodeURI(authorizeUrl))
+      JSON.stringify(authorizeUrl)
     )
   } catch (error) {
     console.error(error);
