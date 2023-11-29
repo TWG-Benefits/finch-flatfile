@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     return new NextResponse(
-      JSON.stringify(authorizeUrl.toString())
+      JSON.stringify(encodeURI(authorizeUrl))
     )
   } catch (error) {
     console.error(error);

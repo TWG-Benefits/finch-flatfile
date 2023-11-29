@@ -38,6 +38,7 @@ export default function processPayments(plan_id: number, finch: FinchRequiredDat
                 email_address_work: individual?.body?.emails.filter(email => email.type === 'work').map(email => email.data).join('; '),
                 phone_number_personal: individual?.body?.phone_numbers.filter(phone => phone.type === 'personal').map(phone => phone.data).join('; '),
 
+                payroll_type: paycheck?.type,
                 gross_wages_amount: paycheck.gross_pay.amount,
                 total_hours: paycheck?.total_hours,
                 debit_date: payDate,

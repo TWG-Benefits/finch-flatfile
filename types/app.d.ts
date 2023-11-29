@@ -33,6 +33,8 @@ type CSVRow = {
     email_address_work: string | undefined | null;
     email_address_personal: string | undefined | null;
     phone_number_personal: string | undefined | null;
+
+    payroll_type: string | undefined | null;
     gross_wages_amount: number;
     total_hours: number | null; // total hours?
     debit_date: string; //YYYY-MM-DD
