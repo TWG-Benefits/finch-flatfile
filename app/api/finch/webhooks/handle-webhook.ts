@@ -2,13 +2,12 @@ import Finch from '@tryfinch/finch-api';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import moment, { Moment } from 'moment'
-import { createSFTPClient } from '@/utils/sftp';
 import { Connection, Customer } from '@/types/database';
 import convertFileToCSV from './convert-file-to-CSV';
 import processPayments from './process-payment';
 import { getFinchData, validateFinchData } from './finch';
 import { finchApiUrl } from '@/utils/constants';
-
+import send from './send-file'
 
 async function handleNewPayment(webhook: PaymentWebhook): Promise<boolean> {
 
@@ -28,7 +27,7 @@ async function handleNewPayment(webhook: PaymentWebhook): Promise<boolean> {
     const file = processPayments(data.customer.plan_id, finch.data)
     const csv = convertFileToCSV(file, finch.data.dataRefreshDate)
 
-    const result = await sendFileViaSFTP(csv, data.customer.customer_name, data.connection.provider_id, data.customer.plan_id, webhook.data.pay_date)
+    const result = await send.sendFileViaSFTP(csv, data.customer.customer_name, data.connection.provider_id, data.customer.plan_id, webhook.data.pay_date)
 
     return result
 }
@@ -74,7 +73,7 @@ async function handleNewDataSync(webhook: DataSyncAllWebhook) {
                     const file = processPayments(data.customer.plan_id, finch.data)
                     const csv = convertFileToCSV(file, finch.data.dataRefreshDate)
 
-                    const result = await sendFileViaSFTP(csv, data.customer.customer_name, data.connection.provider_id, data.customer.plan_id, moment().format("YYYY-MM-DD"))
+                    const result = await send.sendFileViaSFTP(csv, data.customer.customer_name, data.connection.provider_id, data.customer.plan_id, moment().format("YYYY-MM-DD"))
                     return result
                 }
             }
@@ -91,6 +90,12 @@ async function handleNewDataSync(webhook: DataSyncAllWebhook) {
 }
 
 async function handleAccountUpdated(webhook: AccountUpdateWebhook): Promise<boolean> {
+    const { status, data } = await getCustomerAndConnectionFromDB(webhook.company_id)
+
+    if (!status || !data)
+        return false
+
+    console.log(`${data.customer.customer_name} successfully connected`)
     return false
 }
 
@@ -104,7 +109,7 @@ async function handleTestWebhook(): Promise<boolean> {
     `
 
     try {
-        const status = await sendFileViaSFTP(csv, "TESTING", "test", 123, moment().format("YYYY-MM-DD"))
+        const status = await send.sendFileViaSFTP(csv, "TESTING", "test", 123, moment().format("YYYY-MM-DD"))
         console.log('File uploaded via SFTP successfully');
         return status
     } catch (error) {
@@ -115,18 +120,7 @@ async function handleTestWebhook(): Promise<boolean> {
 
 export default { handleNewPayment, handleNewDataSync, handleAccountUpdated, handleTestWebhook }
 
-async function sendFileViaSFTP(csv: string, customerName: string, providerId: string, planId: number, payDate: string): Promise<boolean> {
-    console.log(`Attempting to send file via SFTP`)
-    try {
-        const sftpClient = createSFTPClient()
-        await sftpClient.putCSV(csv, `/${customerName}/finch-${planId}-${providerId}-${payDate}.csv`);
-        console.log('File uploaded via SFTP successfully');
-        return true
-    } catch (error) {
-        console.error('An error occurred:', error);
-        return false
-    }
-}
+
 
 type CustomerConnection = {
     status: boolean,
