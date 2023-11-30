@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Finch from '@tryfinch/finch-api';
 import wh from './handle-webhook';
 import { finchWebhookSecret } from '@/utils/constants';
+export const maxDuration = 10; // This function can run for a maximum of 10 seconds in vercel
 
-export const runtime = 'edge'; // 'nodejs' is the default
 
 const finch = new Finch() // no access token since not needed for webhook secret verification
 
