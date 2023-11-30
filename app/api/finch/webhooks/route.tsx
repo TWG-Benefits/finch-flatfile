@@ -4,6 +4,8 @@ import Finch from '@tryfinch/finch-api';
 import wh from './handle-webhook';
 import { finchWebhookSecret } from '@/utils/constants';
 
+export const runtime = 'edge'; // 'nodejs' is the default
+
 const finch = new Finch() // no access token since not needed for webhook secret verification
 
 export async function POST(req: Request) {
