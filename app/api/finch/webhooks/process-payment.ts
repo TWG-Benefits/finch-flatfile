@@ -1,6 +1,7 @@
 import { calcIndividualYtdByField, sumAmountsForType } from "./util"
 
 export default function processPayments(plan_id: number, finch: FinchRequiredData): CSVRow[] {
+    console.log(`Processing payments`)
     var test: CSVRow[] = []
 
     finch.payStatements.forEach(payStatement => {
@@ -34,9 +35,9 @@ export default function processPayments(plan_id: number, finch: FinchRequiredDat
                 address_city: individual?.body.residence?.city,
                 address_state: individual?.body.residence?.state,
                 address_zip_code: individual?.body.residence?.postal_code,
-                email_address_personal: individual?.body?.emails.filter(email => email.type === 'personal').map(email => email.data).join('; '),
-                email_address_work: individual?.body?.emails.filter(email => email.type === 'work').map(email => email.data).join('; '),
-                phone_number_personal: individual?.body?.phone_numbers.filter(phone => phone.type === 'personal').map(phone => phone.data).join('; '),
+                email_address_personal: individual?.body?.emails?.filter(email => email.type === 'personal').map(email => email.data).join('; '),
+                email_address_work: individual?.body?.emails?.filter(email => email.type === 'work').map(email => email.data).join('; '),
+                phone_number_personal: individual?.body?.phone_numbers?.filter(phone => phone.type === 'personal').map(phone => phone.data).join('; '),
 
                 payroll_type: paycheck?.type,
                 gross_wages_amount: paycheck.gross_pay.amount,

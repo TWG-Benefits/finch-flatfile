@@ -24,7 +24,7 @@ export const finchApiUrl = process.env.FINCH_API_URL ?? 'https://api.tryfinch.co
 export const sandboxApiUrl = process.env.FINCH_SANDBOX_URL ?? 'https://sandbox.tryfinch.com/api'
 export const appName = process.env.APP_NAME ?? 'Acme Co.'
 export const supportEmail = process.env.SUPPORT_EMAIL ?? 'developers@tryfinch.com'
-export const startDateForData = isValidDateFormat(process.env.START_DATA_FOR_DATA?.toString()) ? process.env.START_DATA_FOR_DATA : null
+export const startDateForData = isValidDateFormat(process.env.START_DATE_FOR_DATA?.toString()) ? process.env.START_DATE_FOR_DATA : null
 
 export const finchProducts = process.env.FINCH_PRODUCTS ?? 'company directory individual employment payment pay_statement benefits ssn'
 export const finchRedirectUri = process.env.FINCH_REDIRECT_URI ?? baseUrl + '/api/finch/callback'

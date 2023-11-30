@@ -3,6 +3,8 @@ import Finch from "@tryfinch/finch-api"
 import moment from "moment"
 
 async function getFinchData(token: string, paymentId: string | null = null): Promise<FinchResponseData> {
+    console.log('Retrieving data from Finch')
+
     // Init Finch SDK
     const finch = new Finch({
         accessToken: token
@@ -10,7 +12,7 @@ async function getFinchData(token: string, paymentId: string | null = null): Pro
 
     // FINCH: Get the full list of active employees at the company (/directory + /individual + /employment)
     const dataRefreshDate = (await finch.hris.company.retrieve().asResponse()).headers.get('finch-data-retrieved')
-    const directory = (await finch.hris.directory.list()).individuals.filter(ind => ind.is_active == true) as FinchEmployee[]
+    const directory = (await finch.hris.directory.list()).individuals as FinchEmployee[]
     const individuals = (await finch.hris.individuals.retrieveMany({
         options: {
             include: ["ssn"] // must include SSN, the app should already be authorized using the 'ssn' product scope in Finch Connect
@@ -76,6 +78,8 @@ async function getFinchData(token: string, paymentId: string | null = null): Pro
 }
 
 function validateFinchData(finch: FinchResponseData): { success: boolean, data: FinchRequiredData | null } {
+    console.log('Validating Finch data')
+
     if (!finch.individuals || !finch.employments) {
         console.error(`No employee data returned from Finch`)
         return { success: false, data: null }
@@ -115,7 +119,7 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
             payments: finch.payments,
             payStatements: finch.payStatements,
             ytdPayStatements: finch.ytdPayStatements,
-            dataRefreshDate: `This data was retrieved ${moment(finch.dataRefreshDate).fromNow()} on ${moment(finch.dataRefreshDate).format("dddd, MMMM Do YYYY, h:mm:ss a")}`
+            dataRefreshDate: `This data was retrieved ${moment(finch.dataRefreshDate).fromNow()} on ${moment(finch.dataRefreshDate).format("dddd MMMM Do YYYY h:mm:ss a")}`
         }
     }
 }

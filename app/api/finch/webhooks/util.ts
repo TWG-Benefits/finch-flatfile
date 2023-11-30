@@ -6,7 +6,6 @@ import createSFTPClient from "@/utils/sftp";
 function calcIndividualYtdByField(individualId: string, field: string, ytdPayStatements: FinchPayStatement[], category: 'deductions' | 'contributions' | null = null): number {
     let init = 0
     ytdPayStatements.forEach(payment => {
-        console.log(payment.payment_id)
         if (payment.code === 200) {
             const indPaycheck = payment.body?.pay_statements.find(paycheck => paycheck.individual_id == individualId)
             if (indPaycheck !== null || indPaycheck !== undefined) {
