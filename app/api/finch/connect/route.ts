@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import { finchClientId, finchProducts, finchRedirectUri, isFinchSandbox, supportEmail } from '@/utils/constants';
+import { finchClientId, finchProducts, finchRedirectUri, finchSandbox, supportEmail } from '@/utils/constants';
 
 export async function POST(req: Request) {
   console.log(req.method + " /api/finch/connect");
@@ -18,9 +18,9 @@ export async function POST(req: Request) {
       return NextResponse.json(`There was a problem creating the customer. Try signing out and signing back in. If the problem persists, contact ${supportEmail}.`, { status: 500 })
     }
 
-    const authorizeUrl = (isFinchSandbox === 'true')
-      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}&sandbox=${isFinchSandbox}`).toString()
-      : new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}|customerId=${customer.id}`).toString()
+    const authorizeUrl = (finchSandbox)
+      ? new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}%7CcustomerId=${customer.id}&sandbox=${finchSandbox}`).toString()
+      : new URL(`https://connect.tryfinch.com/authorize?client_id=${finchClientId}&products=${finchProducts}&redirect_uri=${finchRedirectUri}&state=customerName=${customerName}%7CcustomerId=${customer.id}`).toString()
 
 
     // save finch connect url for future reference (like reauthentication events)
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     return new NextResponse(
-      JSON.stringify(authorizeUrl.toString())
+      JSON.stringify(authorizeUrl)
     )
   } catch (error) {
     console.error(error);

@@ -19,28 +19,17 @@ export async function POST(req: Request) {
 
     try {
         if (test_sftp_key == testSftpKey) {
-            console.log("Sending CSV file to SFTP")
+            console.log("Sending Test CSV file to SFTP")
             const sftpClient = createSFTPClient()
             await sftpClient.putCSV(csv, `${sftpPath}/finch-test-${moment().format('YYYY-MM-DD')}.csv`);
-            console.log('File uploaded via SFTP successfully');
+            console.log('Test file uploaded successfully');
 
-            return new NextResponse(
-                JSON.stringify({ ok: true })
-            )
-
+            return NextResponse.json(`Success`, { status: 200 })
         }
 
-
+        return NextResponse.json(`Invalid TEST_SFTP_KEY`, { status: 401 })
     } catch (error) {
         console.error('An error occurred:', error);
-        return new NextResponse(
-            JSON.stringify({ ok: false })
-        )
-
+        return NextResponse.json(`Error`, { status: 500 })
     }
-
-
-
-
-
 }

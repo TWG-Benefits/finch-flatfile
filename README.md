@@ -41,11 +41,15 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 1. Install [Vercel CLI](https://vercel.com/docs/cli)
 
    ```bash
-   $ npm i -g vercel@latest
+   npm i -g vercel@latest
+   ```
    OR
-   $ yarn global add vercel
+   ```
+   yarn global add vercel
+   ```
    THEN
-   $ vercel --version
+   ```
+   vercel --version
    ```
 
 1. Link an [existing Vercel project](https://vercel.com/docs/cli/project-linking)
@@ -63,25 +67,29 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 1. [Pull environment variables](https://vercel.com/docs/cli/env) to a local file
 
    ```bash
-   $ vercel env pull .env.local
+   vercel env pull .env.local
    ```
 
 1. [Optional] Rename `.env.local.example` to `.env.local` and update the environment variables yourself.
 
-1. Instal packages
+1. Install packages
 
    ```bash
-   $ npm install
+   npm install
+   ```
    OR
-   $ yarn
+   ```bash
+   yarn
    ```
 
-1. You can now run the Next.js local development server:
+2. You can now run the Next.js local development server:
 
    ```bash
-   $ npm run dev
+   npm run dev
+   ```
    OR
-   $ yarn dev
+   ```bash
+   yarn dev
    ```
 
    The app should now be running on [localhost:3000](http://localhost:3000/).
@@ -125,6 +133,7 @@ To get finch webhooks to work locally, you need a service like [ngrok](https://n
    ```
 
 1. Create a new webhook in your [Finch Dashboard](https://dashboard.tryfinch.com/) using `https://<your-ngrok-domain>/api/finch/webhooks` (ex: https://dory-wired-mouse.ngrok-free.app/api/finch/webhooks)
+   
 1. Save `webhook_secret` in the .env.local variable
 
 

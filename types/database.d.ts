@@ -1,9 +1,9 @@
 export type Customer = {
     created_at: string
-    customer_name: string | null
+    customer_name: string
     finch_connect_url: string | null
     id: string
-    plan_id: number | null
+    plan_id: number
 }
 
 export type Connection = {
@@ -79,14 +79,14 @@ export interface Database {
             customers: {
                 Row: {
                     created_at: string
-                    customer_name: string | null
+                    customer_name: string
                     finch_connect_url: string | null
                     id: string
-                    plan_id: number | null
+                    plan_id: number
                 }
                 Insert: {
                     created_at?: string
-                    customer_name?: string | null
+                    customer_name?: string
                     finch_connect_url?: string | null
                     id?: string
                     plan_id?: number | null
