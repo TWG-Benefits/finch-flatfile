@@ -303,7 +303,7 @@ interface AccountUpdateWebhook extends FinchWebhookEvent {
     data: StatusData;
 }
 interface StatusData {
-    status: 'pending' | 'processing' | 'connected' | 'error_permissions' | 'error_reauth' | 'error_no_acount_setup';
+    status: 'pending' | 'processing' | 'CONNECTED' | 'error_permissions' | 'ERROR_REAUTH' | 'error_no_acount_setup';
     authentication_method: 'credential' | 'api_token' | 'oauth' | 'assisted';
 }
 

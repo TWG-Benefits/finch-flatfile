@@ -19,31 +19,32 @@ function calcIndividualYtdByField(individualId: string, field: string, ytdPaySta
 
 function findFieldAmount(obj: any, fieldToFind: string, category: 'deductions' | 'contributions' | null = null): number | undefined {
     // Base case: If obj is not an object or is null, return undefined
-    if (obj === null || obj === undefined) {
+    if (typeof obj !== 'object' || obj === null) {
         return undefined;
     }
 
     // Check for the field at the current level of the object
-    if (obj.hasOwnProperty(fieldToFind)) {
+    if (Object.prototype.hasOwnProperty.call(obj, fieldToFind)) {
         // If the field is an object and has an 'amount' property, return that
-        if (typeof obj[fieldToFind] === 'object' && obj[fieldToFind].hasOwnProperty('amount')) {
+        if (typeof obj[fieldToFind] === 'object' && Object.prototype.hasOwnProperty.call(obj[fieldToFind], 'amount')) {
             return obj[fieldToFind].amount;
         }
         // Otherwise, return the field's value directly
         return obj[fieldToFind];
     }
 
-    if (category === 'deductions' && obj.hasOwnProperty('employee_deductions')) {
+    // Handle specific categories
+    if (category === 'deductions' && Object.prototype.hasOwnProperty.call(obj, 'employee_deductions')) {
         return sumFieldInDeductions(obj, fieldToFind);
     }
 
-    if (category === 'contributions' && obj.hasOwnProperty('employer_contributions')) {
+    if (category === 'contributions' && Object.prototype.hasOwnProperty.call(obj, 'employer_contributions')) {
         return sumFieldInContributions(obj, fieldToFind);
     }
 
     // If the current level is an object, iterate through its fields
     for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
             const item = obj[key];
             if (item && typeof item === 'object') {
                 const result = findFieldAmount(item, fieldToFind, category);
