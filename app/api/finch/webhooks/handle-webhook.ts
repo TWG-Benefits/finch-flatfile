@@ -76,14 +76,14 @@ async function handleAccountUpdated(webhook: AccountUpdateWebhook): Promise<bool
         return false
 
     switch (webhook.data.status) {
-        case 'connected':
+        case 'CONNECTED':
             console.log(`${data.customer.customer_name} successfully connected`)
             break;
-        case 'error_reauth':
+        case 'ERROR_REAUTH':
             console.error(`Need to reauthenticate ${data.customer.customer_name}. Send Finch Connect Url again. ${data.customer.finch_connect_url}`)
             break;
         default:
-            console.log(`${webhook} status event not handled`)
+            console.log(`${webhook.data.status} status event not handled`)
     }
     return true
 }
