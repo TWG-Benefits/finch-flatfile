@@ -13,7 +13,7 @@ export type Connection = {
     customer_id: string
     finch_access_token: string
     id: string
-    last_processed_payment: string | null
+    data_sync_complete: boolean
     provider_id: string
 }
 
@@ -36,7 +36,7 @@ export interface Database {
                     customer_id: string
                     finch_access_token: string
                     id: string
-                    last_processed_payment: string | null
+                    data_sync_complete: boolean
                     provider_id: string
                 }
                 Insert: {
@@ -46,7 +46,7 @@ export interface Database {
                     customer_id: string
                     finch_access_token: string
                     id?: string
-                    last_processed_payment?: string | null
+                    data_sync_complete?: boolean
                     provider_id: string
                 }
                 Update: {
@@ -56,7 +56,7 @@ export interface Database {
                     customer_id?: string
                     finch_access_token?: string
                     id?: string
-                    last_processed_payment?: string | null
+                    data_sync_complete?: boolean
                     provider_id?: string
                 }
                 Relationships: [

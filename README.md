@@ -169,6 +169,7 @@ For more information, please contact your Developer Success Engineer or your Acc
     provider_id text not null,
     account_id uuid null,
     finch_access_token uuid not null,
+    full_data_sync boolean not null default false,
     created_at timestamp with time zone not null default now(),
     CONSTRAINT connections_company_id_key unique (finch_access_token),
     CONSTRAINT Connections_pkey PRIMARY KEY (id),
