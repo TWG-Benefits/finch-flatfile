@@ -154,7 +154,7 @@ For more information, please contact your Developer Success Engineer or your Acc
  create table customers (
     id uuid NOT NULL DEFAULT gen_random_uuid (),
     customer_name text null,
-    plan_id bigint null,
+    plan_id text null,
     finch_connect_url text null,
     created_at timestamp with time zone not null default now(),
     CONSTRAINT Customers_pkey PRIMARY KEY (id)
