@@ -4,7 +4,7 @@ async function sendFileViaSFTP(csv: string, customerName: string, providerId: st
     console.log(`Attempting to send file via SFTP`)
     try {
         const sftpClient = createSFTPClient()
-        await sftpClient.putCSV(csv, `/${customerName}/finch-${planId}-${providerId}-${payDate}.csv`);
+        await sftpClient.putCSV(csv, `/finch-${planId}-${customerName}-${providerId}-${payDate}.csv`);
         console.log('File uploaded via SFTP successfully');
         return true
     } catch (error) {

@@ -158,8 +158,8 @@ async function getCustomerAndConnectionFromDB(companyId: string): Promise<Custom
     }
 
     console.log(`CUSTOMER: ${customer?.customer_name}`)
-    console.log("CONNECTION")
-    console.log(connection)
+    console.log(`CONNECTION: ${connection.id}`)
+    console.log(`PROVIDER: ${connection.provider_id}`)
 
     return { status: true, data: { customer, connection } }
 }
