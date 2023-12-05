@@ -1,4 +1,3 @@
-import Finch from '@tryfinch/finch-api';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import moment, { Moment } from 'moment'
@@ -6,8 +5,9 @@ import { Connection, Customer } from '@/types/database';
 import convertFileToCSV from './convert-file-to-CSV';
 import processPayments from './process-payments';
 import { getFinchData, validateFinchData } from './finch';
-import { finchApiUrl } from '@/utils/constants';
 import send from './send-file'
+var util = require('util');
+import fs from 'fs'
 
 async function handleNewPayment(webhook: PaymentWebhook): Promise<boolean> {
     console.log(`Handle new payment webhook`)
@@ -43,8 +43,12 @@ async function handleNewDataSync(webhook: DataSyncAllWebhook) {
 
     const token = data.connection.finch_access_token
 
+    // if the initial data sync has not completed, try to sync again
     if (!data.connection.data_sync_complete) {
         const finchData = await getFinchData(token)
+
+        //fs.writeFileSync('test.json', JSON.stringify(finchData, null, 2));
+
         const finch = validateFinchData(finchData)
 
         if (!finch.success || !finch.data)
@@ -76,10 +80,10 @@ async function handleAccountUpdated(webhook: AccountUpdateWebhook): Promise<bool
         return false
 
     switch (webhook.data.status) {
-        case 'CONNECTED':
+        case 'connected':
             console.log(`${data.customer.customer_name} successfully connected`)
             break;
-        case 'ERROR_REAUTH':
+        case 'error_reauth':
             console.error(`Need to reauthenticate ${data.customer.customer_name}. Send Finch Connect Url again. ${data.customer.finch_connect_url}`)
             break;
         default:

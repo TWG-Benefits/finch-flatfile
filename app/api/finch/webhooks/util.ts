@@ -1,8 +1,3 @@
-import createSFTPClient from "@/utils/sftp";
-
-
-
-
 function calcIndividualYtdByField(individualId: string, field: string, ytdPayStatements: FinchPayStatement[], category: 'deductions' | 'contributions' | null = null): number {
     let init = 0
     ytdPayStatements.forEach(payment => {
@@ -24,33 +19,30 @@ function findFieldAmount(obj: any, fieldToFind: string, category: 'deductions' |
     }
 
     // Check for the field at the current level of the object
-    if (Object.prototype.hasOwnProperty.call(obj, fieldToFind)) {
-        // If the field is an object and has an 'amount' property, return that
-        if (typeof obj[fieldToFind] === 'object' && Object.prototype.hasOwnProperty.call(obj[fieldToFind], 'amount')) {
-            return obj[fieldToFind].amount;
+    if (obj.hasOwnProperty(fieldToFind)) {
+        // If the field is an object with an 'amount' property, return that
+        const field = obj[fieldToFind];
+        if (typeof field === 'object' && field !== null && 'amount' in field && typeof field.amount === 'number') {
+            return field.amount;
         }
         // Otherwise, return the field's value directly
-        return obj[fieldToFind];
+        return typeof obj[fieldToFind] === 'number' ? obj[fieldToFind] : undefined;
     }
 
-    // Handle specific categories
-    if (category === 'deductions' && Object.prototype.hasOwnProperty.call(obj, 'employee_deductions')) {
-        return sumFieldInDeductions(obj, fieldToFind);
+    // Delegate to specialized functions for deductions and contributions
+    if (category === 'deductions' && obj.hasOwnProperty('employee_deductions')) {
+        return sumFieldInCategory(obj['employee_deductions'], fieldToFind);
+    }
+    if (category === 'contributions' && obj.hasOwnProperty('employer_contributions')) {
+        return sumFieldInCategory(obj['employer_contributions'], fieldToFind);
     }
 
-    if (category === 'contributions' && Object.prototype.hasOwnProperty.call(obj, 'employer_contributions')) {
-        return sumFieldInContributions(obj, fieldToFind);
-    }
-
-    // If the current level is an object, iterate through its fields
+    // Recursively search in nested objects
     for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            const item = obj[key];
-            if (item && typeof item === 'object') {
-                const result = findFieldAmount(item, fieldToFind, category);
-                if (result !== undefined) {
-                    return result;
-                }
+        if (obj.hasOwnProperty(key) && typeof obj[key] === 'object') {
+            const result = findFieldAmount(obj[key], fieldToFind, category);
+            if (result !== undefined) {
+                return result;
             }
         }
     }
@@ -59,22 +51,30 @@ function findFieldAmount(obj: any, fieldToFind: string, category: 'deductions' |
     return undefined;
 }
 
-function sumFieldInDeductions(obj: any, fieldType: string): number | undefined {
-    const category = 'employee_deductions'
-    if (!obj || !obj[category] || !Array.isArray(obj[category])) {
+function sumFieldInCategory(
+    categoryArray: {
+        name: string;
+        amount: number;
+        type: string | null;
+        currency: string | null;
+        pre_tax?: boolean | null;
+    }[],
+    fieldType: string): (number | undefined) {
+
+    if (!Array.isArray(categoryArray)) {
         return undefined;
     }
 
-    return sumAmountsForType(obj[category], fieldType);
-}
+    let total = 0;
+    let fieldFound = false;
+    categoryArray.forEach(element => {
+        if (element?.type === fieldType && typeof element?.amount === 'number') {
+            total += element.amount;
+            fieldFound = true;
+        }
+    });
 
-function sumFieldInContributions(obj: any, fieldType: string): number | undefined {
-    const category = 'employer_contributions'
-    if (!obj || !obj[category] || !Array.isArray(obj[category])) {
-        return undefined;
-    }
-
-    return sumAmountsForType(obj[category], fieldType);
+    return fieldFound ? total : undefined;
 }
 
 function sumAmountsForType(array: any[] | null, type: string | null): number | undefined {
@@ -92,4 +92,4 @@ function sumAmountsForType(array: any[] | null, type: string | null): number | u
     return found ? total : undefined;
 }
 
-export { calcIndividualYtdByField, findFieldAmount, sumFieldInDeductions, sumFieldInContributions, sumAmountsForType }
+export { calcIndividualYtdByField, findFieldAmount, sumFieldInCategory, sumAmountsForType }

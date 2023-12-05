@@ -103,7 +103,6 @@ function validateFinchData(finch: FinchResponseData): { success: boolean, data: 
         console.log(invalidYtdPayStatements)
         return { success: false, data: null }
     }
-
     const invalidPayStatements = finch.payStatements.filter(obj => obj.code !== 200)
     if (invalidPayStatements.length !== 0) {
         console.log(`Error in current pay statements`)

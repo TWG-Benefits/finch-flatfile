@@ -12,7 +12,7 @@ export default function processPayments(plan_id: number, finch: FinchRequiredDat
         const payDate = payment?.pay_date
         const payPeriodStartDate = payment.pay_period?.start_date
         const payPeriodEndDate = payment.pay_period?.end_date
-        const payFrequencyCode = "semi_monthly" // ???
+        const payFrequencyCode = null // TODO: ???
 
         payStatement.body.pay_statements.forEach(paycheck => {
             const individual = finch.individuals.find(ind => ind.individual_id == paycheck.individual_id)

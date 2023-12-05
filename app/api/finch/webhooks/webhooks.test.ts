@@ -251,7 +251,21 @@ const constants = {
                 "amount": 2134,
                 "currency": "usd",
                 "pre_tax": true
-            }
+            },
+            {
+                "type": null,
+                "name": "test",
+                "amount": 10000,
+                "currency": "usd",
+                "pre_tax": false
+            },
+            {
+                "type": null,
+                "name": "testing",
+                "amount": -1000,
+                "currency": "usd",
+                "pre_tax": false
+            },
         ],
         "employer_contributions": [
             {
@@ -277,7 +291,14 @@ const constants = {
                 "name": "VIS Employer",
                 "amount": 4268,
                 "currency": "usd"
-            }
+            },
+            {
+                "type": null,
+                "name": "test",
+                "amount": -1000,
+                "currency": "usd",
+                "pre_tax": false
+            },
         ]
     },
     ytd: [
@@ -384,7 +405,14 @@ const constants = {
                                 "amount": 2134,
                                 "currency": "usd",
                                 "pre_tax": true
-                            }
+                            },
+                            {
+                                "type": null,
+                                "name": "test",
+                                "amount": -1000,
+                                "currency": "usd",
+                                "pre_tax": false
+                            },
                         ],
                         "employer_contributions": [
                             {
@@ -410,7 +438,14 @@ const constants = {
                                 "name": "VIS Employer",
                                 "amount": 4268,
                                 "currency": "usd"
-                            }
+                            },
+                            {
+                                "type": null,
+                                "name": "test",
+                                "amount": -1000,
+                                "currency": "usd",
+                                "pre_tax": false
+                            },
                         ]
                     },
                     {
@@ -637,7 +672,14 @@ const constants = {
                                 "amount": 1295,
                                 "currency": "usd",
                                 "pre_tax": true
-                            }
+                            },
+                            {
+                                "type": null,
+                                "name": "testing",
+                                "amount": 10000,
+                                "currency": "usd",
+                                "pre_tax": false
+                            },
                         ],
                         "employer_contributions": [
                             {
