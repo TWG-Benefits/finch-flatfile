@@ -6,6 +6,8 @@ import convertFileToCSV from './convert-file-to-CSV';
 import processPayments from './process-payments';
 import { getFinchData, validateFinchData } from './finch';
 import send from './send-file'
+var util = require('util');
+import fs from 'fs'
 
 async function handleNewPayment(webhook: PaymentWebhook): Promise<boolean> {
     console.log(`Handle new payment webhook`)
@@ -44,6 +46,9 @@ async function handleNewDataSync(webhook: DataSyncAllWebhook) {
     // if the initial data sync has not completed, try to sync again
     if (!data.connection.data_sync_complete) {
         const finchData = await getFinchData(token)
+
+        //fs.writeFileSync('test.json', JSON.stringify(finchData, null, 2));
+
         const finch = validateFinchData(finchData)
 
         if (!finch.success || !finch.data)
